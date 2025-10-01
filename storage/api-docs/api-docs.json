@@ -71,6 +71,481 @@
                 }
             }
         },
+        "/api/student-khs": {
+            "get": {
+                "tags": [
+                    "KHS"
+                ],
+                "summary": "Get student KHS",
+                "description": "Ambil data KHS mahasiswa berdasarkan Student_Id (wajib) dan Term_Year_Id (opsional)",
+                "operationId": "661c61aad2a0cf94064dab25b87f027f",
+                "parameters": [
+                    {
+                        "name": "Student_Id",
+                        "in": "query",
+                        "description": "ID mahasiswa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12345
+                        }
+                    },
+                    {
+                        "name": "Term_Year_Id",
+                        "in": "query",
+                        "description": "ID tahun akademik (opsional)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20241
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student KHS retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student KHS retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "Student_Id": {
+                                                    "type": "integer",
+                                                    "example": 12345
+                                                },
+                                                "Full_Name": {
+                                                    "type": "string",
+                                                    "example": "Ahmad Budi"
+                                                },
+                                                "Nim": {
+                                                    "type": "string",
+                                                    "example": "210101001"
+                                                },
+                                                "Khs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "Krs_Id": {
+                                                                "type": "integer",
+                                                                "example": 1001
+                                                            },
+                                                            "Course_Id": {
+                                                                "type": "integer",
+                                                                "example": 2001
+                                                            },
+                                                            "Course_Code": {
+                                                                "type": "string",
+                                                                "example": "IF101"
+                                                            },
+                                                            "Course_Name": {
+                                                                "type": "string",
+                                                                "example": "Algoritma & Pemrograman"
+                                                            },
+                                                            "Sks": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "Grade_Letter_Id": {
+                                                                "type": "string",
+                                                                "example": "A"
+                                                            },
+                                                            "Weight_Value": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 4
+                                                            },
+                                                            "Bnk_Value": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 12
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Student not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student not found"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "Student_Id": [
+                                                    "The Student_Id field is required."
+                                                ]
+                                            }
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SQLSTATE[42S22]: Column not found"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/student-krs": {
+            "get": {
+                "tags": [
+                    "KRS"
+                ],
+                "summary": "Get KRS data of a student",
+                "description": "Ambil data KRS berdasarkan Student_Id dan opsional Term_Year_Id",
+                "operationId": "cf674f4dbebcdffd63048604bd1b3b02",
+                "parameters": [
+                    {
+                        "name": "Student_Id",
+                        "in": "query",
+                        "description": "ID mahasiswa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2422
+                        }
+                    },
+                    {
+                        "name": "Term_Year_Id",
+                        "in": "query",
+                        "description": "ID tahun ajaran (opsional)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20241
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student KRS retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student KRS retrieved successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "Student_Id": {
+                                                    "type": "integer",
+                                                    "example": 2422
+                                                },
+                                                "Full_Name": {
+                                                    "type": "string",
+                                                    "example": "Budi Santoso"
+                                                },
+                                                "Nim": {
+                                                    "type": "string",
+                                                    "example": "202300123"
+                                                },
+                                                "Krs": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "Krs_Id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "Term_Year_Id": {
+                                                                "type": "integer",
+                                                                "example": 20241
+                                                            },
+                                                            "Course_Id": {
+                                                                "type": "integer",
+                                                                "example": 55
+                                                            },
+                                                            "Course_Code": {
+                                                                "type": "string",
+                                                                "example": "IF101"
+                                                            },
+                                                            "Course_Name": {
+                                                                "type": "string",
+                                                                "example": "Pemrograman Dasar"
+                                                            },
+                                                            "Sks": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "Class_Prog_Id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "Class_Program_Name": {
+                                                                "type": "string",
+                                                                "example": "Reguler"
+                                                            },
+                                                            "Class_Id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "Class_Name": {
+                                                                "type": "string",
+                                                                "example": "A"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Token tidak valid atau tidak ada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Authentication token not provided"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No bearer token found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Student not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 404
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student not found"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Student not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "error": {
+                                            "type": "object",
+                                            "example": {
+                                                "Student_Id": [
+                                                    "The Student_Id field is required."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SQLSTATE[HY000]: General error ..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/master/departments": {
             "get": {
                 "tags": [
@@ -476,7 +951,7 @@
                                                     },
                                                     "Register_Number": {
                                                         "type": "string",
-                                                        "example": "REG123"
+                                                        "example": "123456"
                                                     },
                                                     "Full_Name": {
                                                         "type": "string",
@@ -640,6 +1115,14 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "KHS",
+            "description": "KHS"
+        },
+        {
+            "name": "KRS",
+            "description": "KRS"
         },
         {
             "name": "Master",

@@ -9,9 +9,105 @@ use App\Traits\ApiResponseTrait;
 class KhsController extends Controller
 {
     use ApiResponseTrait;
+
     /**
-     * Ambil data KHS Mahasiswa dengan filter Student_Id & Term_Year_Id
+     * @OA\Get(
+     *     path="/api/student-khs",
+     *     tags={"KHS"},
+     *     summary="Get student KHS",
+     *     description="Ambil data KHS mahasiswa berdasarkan Student_Id (wajib) dan Term_Year_Id (opsional)",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="Student_Id",
+     *         in="query",
+     *         required=true,
+     *         description="ID mahasiswa",
+     *         @OA\Schema(type="integer", example=12345)
+     *     ),
+     *     @OA\Parameter(
+     *         name="Term_Year_Id",
+     *         in="query",
+     *         required=false,
+     *         description="ID tahun akademik (opsional)",
+     *         @OA\Schema(type="integer", example=20241)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student KHS retrieved successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Student KHS retrieved successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="Student_Id", type="integer", example=12345),
+     *                 @OA\Property(property="Full_Name", type="string", example="Ahmad Budi"),
+     *                 @OA\Property(property="Nim", type="string", example="210101001"),
+     *                 @OA\Property(
+     *                     property="Khs",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="Krs_Id", type="integer", example=1001),
+     *                         @OA\Property(property="Course_Id", type="integer", example=2001),
+     *                         @OA\Property(property="Course_Code", type="string", example="IF101"),
+     *                         @OA\Property(property="Course_Name", type="string", example="Algoritma & Pemrograman"),
+     *                         @OA\Property(property="Sks", type="integer", example=3),
+     *                         @OA\Property(property="Grade_Letter_Id", type="string", example="A"),
+     *                         @OA\Property(property="Weight_Value", type="number", format="float", example=4.00),
+     *                         @OA\Property(property="Bnk_Value", type="number", format="float", example=12.00)
+     *                     )
+     *                 )
+     *             ),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="total", type="integer", example=5)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Student not found",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=404),
+     *             @OA\Property(property="message", type="string", example="Student not found"),
+     *             @OA\Property(property="data", type="array", @OA\Items())
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation failed",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=422),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object",
+     *                 example={"Student_Id": {"The Student_Id field is required."}}
+     *             ),
+     *             @OA\Property(property="data", type="array", @OA\Items())
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=500),
+     *             @OA\Property(property="message", type="string", example="Internal server error"),
+     *             @OA\Property(property="error", type="string", example="SQLSTATE[42S22]: Column not found"),
+     *             @OA\Property(property="data", type="array", @OA\Items())
+     *         )
+     *     )
+     * )
      */
+
     public function studentKhs(Request $request)
     {
         try {

@@ -47,7 +47,7 @@ class StudentController extends Controller
      *                 @OA\Items(
      *                     @OA\Property(property="Student_Id", type="integer", example=1),
      *                     @OA\Property(property="Nim", type="string", example="20220500075"),
-     *                     @OA\Property(property="Register_Number", type="string", example="REG123"),
+     *                     @OA\Property(property="Register_Number", type="string", example="123456"),
      *                     @OA\Property(property="Full_Name", type="string", example="Budi Santoso"),
      *                     @OA\Property(property="Department", type="string", example="Teknik Informatika"),
      *                     @OA\Property(property="Class_Program", type="string", example="Reguler"),
