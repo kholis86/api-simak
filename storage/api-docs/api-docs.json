@@ -1,0 +1,653 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sistem Akademik API",
+        "description": "Dokumentasi API untuk login, student, dan master data",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost",
+            "description": "Local server"
+        }
+    ],
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login to get API token",
+                "description": "Authenticate user with username & password, returns Bearer token",
+                "operationId": "adbe720dc4dcedd623b9794954f55254",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "api-simak"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful login",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abcdef123456..."
+                                        },
+                                        "expired_at": {
+                                            "type": "string",
+                                            "example": "2025-09-29 14:30:00"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                }
+            }
+        },
+        "/api/master/departments": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get department list",
+                "operationId": "98184b1895401787e326be2bff9ccef4",
+                "responses": {
+                    "200": {
+                        "description": "Department list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "mstr_department list retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "Department_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Department_Name": {
+                                                        "type": "string",
+                                                        "example": "Hukum"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master/program-classes": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get program class list",
+                "operationId": "301b9c6053c24b2b7f81d7d241004e74",
+                "responses": {
+                    "200": {
+                        "description": "Program class list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "mstr_program_class list retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "Program_Class_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Program_Class_Name": {
+                                                        "type": "string",
+                                                        "example": "Reguler"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master/religions": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get religion list",
+                "operationId": "3631ef7b139d38416b0d01b53a11cbd8",
+                "responses": {
+                    "200": {
+                        "description": "Religion list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "mstr_religion list retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "Religion_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Religion_Name": {
+                                                        "type": "string",
+                                                        "example": "Islam"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master/marital-statuses": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get marital status list",
+                "operationId": "a386020dfc46af64f01549bf40e1870e",
+                "responses": {
+                    "200": {
+                        "description": "Marital status list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "mstr_marital_status list retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "Marital_Status_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Marital_Status_Name": {
+                                                        "type": "string",
+                                                        "example": "Belum Menikah"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/students": {
+            "get": {
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get student list",
+                "operationId": "394857d3d6f6e1755d52d4266e42bb1b",
+                "parameters": [
+                    {
+                        "name": "nim",
+                        "in": "query",
+                        "description": "Filter by Nim",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "register_number",
+                        "in": "query",
+                        "description": "Filter by Register Number",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "department",
+                        "in": "query",
+                        "description": "Filter by Department Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Student list retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student list retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "Student_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Nim": {
+                                                        "type": "string",
+                                                        "example": "20220500075"
+                                                    },
+                                                    "Register_Number": {
+                                                        "type": "string",
+                                                        "example": "REG123"
+                                                    },
+                                                    "Full_Name": {
+                                                        "type": "string",
+                                                        "example": "Budi Santoso"
+                                                    },
+                                                    "Department": {
+                                                        "type": "string",
+                                                        "example": "Teknik Informatika"
+                                                    },
+                                                    "Class_Program": {
+                                                        "type": "string",
+                                                        "example": "Reguler"
+                                                    },
+                                                    "Religion": {
+                                                        "type": "string",
+                                                        "example": "Islam"
+                                                    },
+                                                    "Marital_Status": {
+                                                        "type": "string",
+                                                        "example": "Single"
+                                                    },
+                                                    "Birth_Place": {
+                                                        "type": "string",
+                                                        "example": "Palembang"
+                                                    },
+                                                    "Birth_Date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2002-05-20"
+                                                    },
+                                                    "Entry_Year": {
+                                                        "type": "integer",
+                                                        "example": 2022
+                                                    },
+                                                    "Entry_Term_Id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "Nisn": {
+                                                        "type": "string",
+                                                        "example": "1234567890"
+                                                    },
+                                                    "Nik": {
+                                                        "type": "string",
+                                                        "example": "167xxxxxxxxxxx"
+                                                    },
+                                                    "Email_Corporate": {
+                                                        "type": "string",
+                                                        "example": "budi@sibermu.ac.id"
+                                                    },
+                                                    "Phone_Mobile": {
+                                                        "type": "string",
+                                                        "example": "081234567890"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthorized"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": null
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Failed to retrieve student list"
+                                        },
+                                        "error": {
+                                            "type": "string",
+                                            "example": "SQLSTATE[42S22]: Column not found..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Master",
+            "description": "Master"
+        },
+        {
+            "name": "Student",
+            "description": "Student"
+        }
+    ]
+}
