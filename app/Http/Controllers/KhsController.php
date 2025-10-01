@@ -153,7 +153,7 @@ class KhsController extends Controller
                 ->where('krs.Student_Id', $studentId);
 
             if ($termYearId) {
-                $khsQuery->where('k.Term_Year_Id', $termYearId);
+                $khsQuery->where('krs.Term_Year_Id', $termYearId);
             }
 
             $krsCursor = $khsQuery->cursor();
