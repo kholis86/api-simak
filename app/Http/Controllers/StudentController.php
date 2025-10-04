@@ -36,6 +36,13 @@ class StudentController extends Controller
      *         description="Filter by Department Id",
      *         @OA\Schema(type="integer")
      *     ),
+     *     @OA\Parameter(
+     *         name="entry_year",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by Entry Year Id",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Student list retrieved successfully",

@@ -3,7 +3,7 @@
     "info": {
         "title": "Sistem Akademik API",
         "description": "Dokumentasi API untuk login, student, dan master data",
-        "version": "1.1.0"
+        "version": "1.0.0"
     },
     "servers": [
         {
@@ -304,7 +304,7 @@
                     "KRS"
                 ],
                 "summary": "Get KRS data of a student",
-                "description": "Ambil data KRS berdasarkan Student_Id (wajib) dan opsional Term_Year_Id",
+                "description": "Ambil data KRS berdasarkan Student_Id dan opsional Term_Year_Id",
                 "operationId": "cf674f4dbebcdffd63048604bd1b3b02",
                 "parameters": [
                     {
@@ -912,6 +912,15 @@
                         "name": "department",
                         "in": "query",
                         "description": "Filter by Department Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry_year",
+                        "in": "query",
+                        "description": "Filter by Entry Year Id",
                         "required": false,
                         "schema": {
                             "type": "integer"
