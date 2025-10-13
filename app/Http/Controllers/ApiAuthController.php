@@ -10,7 +10,7 @@ class ApiAuthController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/login",
+     *     path="/api/token/login",
      *     tags={"Auth"},
      *     summary="Login to get API token",
      *     description="Authenticate user with username & password, returns Bearer token",
@@ -49,7 +49,7 @@ class ApiAuthController extends Controller
             return response()->json([
                 'success' => false,
                 'code'    => 401,
-                'message' => 'Invalid credentials',
+                'message' => 'Invalid Token credentials',
                 'data'    => null
             ], 401);
         }

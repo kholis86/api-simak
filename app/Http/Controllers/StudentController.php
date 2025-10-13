@@ -6,6 +6,7 @@ use App\Models\AcdStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\ApiResponseTrait;
+use App\Helpers\TanggalIndo;
 
 class StudentController extends Controller
 {
@@ -113,14 +114,59 @@ class StudentController extends Controller
                 'department_id' => 'nullable|integer',
             ]);
 
+            $serverPaging = filter_var($request->server_paging, FILTER_VALIDATE_BOOLEAN);
+            $perPage = (int) $request->get('per_page', 20);
+            $detail = $request->boolean('detail', false);
+
             $students = [];
 
             $query = DB::table('acd_student as s')
                 ->leftJoin('mstr_department as d', 's.Department_Id', '=', 'd.Department_Id')
                 ->leftJoin('mstr_class_program as cp', 's.Class_Prog_Id', '=', 'cp.Class_Prog_Id')
-                ->leftJoin('mstr_religion as r', 's.Religion_Id', '=', 'r.Religion_Id')
-                ->leftJoin('mstr_marital_status as m', 's.Marital_Status_Id', '=', 'm.Marital_Status_Id')
-                ->select(
+                ->leftJoin('mstr_gender as g', 's.Gender_Id', '=', 'g.Gender_Id')
+                ->leftJoin('mstr_religion as r', 's.Religion_Id', '=', 'r.Religion_Id');
+
+            // === SELECT KONDISIONAL BERDASARKAN DETAIL ===
+            if ($detail) {
+                $query
+                    ->leftJoin('mstr_register_status as rs', 's.Register_Status_Id', '=', 'rs.Register_Status_Id')
+                    ->leftJoin('mstr_citizenship as ctz', 's.Citizenship_Id', '=', 'ctz.Citizenship_Id')
+                    ->leftJoin('mstr_transport_type as t', 's.Transport_Type_Id', '=', 't.Transport_Type_Id')
+                    ->leftJoin('acd_student_address as addr', 's.Student_Id', '=', 'addr.Student_Id')
+                    ->leftJoin('mstr_district as dist', 'addr.District_Id', '=', 'dist.District_Id')
+                    ->select(
+                        's.Student_Id',
+                        's.Nim',
+                        's.Full_Name',
+                        's.Register_Number',
+                        's.Entry_Year_Id',
+                        's.Entry_Term_Id',
+                        's.Nisn',
+                        's.Nik',
+                        's.Npwp',
+                        's.Phone_Mobile',
+                        's.Email_Corporate',
+                        's.Birth_Place',
+                        's.Birth_Date',
+                        's.Recieve_Kps',
+                        's.Kps_Number',
+                        'd.Department_Name',
+                        'cp.Class_Program_Name',
+                        'g.Gender_Type',
+                        'r.Religion_Name',
+                        'rs.Register_Status_Name',
+                        'ctz.Citizenship_Name',
+                        't.Transport_Type',
+                        'addr.Address',
+                        'addr.Rt',
+                        'addr.Rw',
+                        'addr.Dusun',
+                        'addr.Sub_District',
+                        'dist.District_Name',
+                        'addr.Zip_Code'
+                    );
+            } else {
+                $query->select(
                     's.Student_Id',
                     's.Nim',
                     's.Register_Number',
@@ -128,7 +174,6 @@ class StudentController extends Controller
                     'd.Department_Name as Department',
                     'cp.Class_Program_Name as Class_Program',
                     'r.Religion_Name as Religion',
-                    'm.Marital_Status_Type as Marital_Status',
                     's.Birth_Place',
                     's.Birth_Date',
                     's.Entry_Year_Id',
@@ -136,38 +181,165 @@ class StudentController extends Controller
                     's.Nisn',
                     's.Nik',
                     's.Email_Corporate',
-                    's.Phone_Mobile'
+                    's.Phone_Mobile',
+                    'g.Gender_Type'
                 );
+            }
 
-            // filter dinamis
+            // === FILTER ===
+            if ($request->filled('student_id')) $query->where('s.Student_Id', $request->student_id);
             if ($request->filled('nim')) $query->where('s.Nim', $request->nim);
             if ($request->filled('register_number')) $query->where('s.Register_Number', $request->register_number);
             if ($request->filled('department_id')) $query->where('s.Department_Id', $request->department_id);
             if ($request->filled('entry_year')) $query->where('s.Entry_Year_Id', $request->entry_year);
 
-            // gunakan cursor untuk streaming → 1 query → memory ringan
-            foreach ($query->orderBy('s.Student_Id')->cursor() as $student) {
-                $students[] = [
-                    'Student_Id'       => $student->Student_Id,
-                    'Nim'              => $student->Nim,
-                    'Register_Number'  => $student->Register_Number,
-                    'Full_Name'        => $student->Full_Name,
-                    'Department'       => $student->Department,
-                    'Class_Program'    => $student->Class_Program,
-                    'Religion'         => $student->Religion,
-                    'Marital_Status'   => $student->Marital_Status,
-                    'Birth_Place'      => $student->Birth_Place,
-                    'Birth_Date'       => $student->Birth_Date,
-                    'Entry_Year'       => $student->Entry_Year_Id,
-                    'Entry_Term_Id'    => $student->Entry_Term_Id,
-                    'Nisn'             => $student->Nisn,
-                    'Nik'              => $student->Nik,
-                    'Email_Corporate'  => $student->Email_Corporate,
-                    'Phone_Mobile'     => $student->Phone_Mobile,
-                ];
+            $query->orderBy('s.Nim');
+
+            // === DETAIL DATA PREFETCH ===
+            if ($detail) {
+                $termYears = DB::table('mstr_term_year')->get()->keyBy('Term_Year_Id');
+                $allParents = DB::table('acd_student_parent as p')
+                    ->leftJoin('mstr_education_type as edu', 'p.Education_Type_Id', '=', 'edu.Education_Type_Id')
+                    ->leftJoin('mstr_job_category as job', 'p.Job_Category_Id', '=', 'job.Job_Category_Id')
+                    ->select(
+                        'p.Student_Id',
+                        'p.Parent_Type_Id',
+                        'p.Nik',
+                        'p.Full_Name',
+                        'p.Birth_Date',
+                        'edu.Education_Type_Name',
+                        'job.Job_Category_Name',
+                        'p.Income'
+                    )
+                    ->get()
+                    ->groupBy('Student_Id');
+
+                $allCamaru = DB::table('reg_camaru as ca')
+                    ->join('reg_register_type as rt', 'ca.Register_Type_Id', '=', 'rt.Register_Type_Id')
+                    ->select('ca.Reg_Num', 'rt.Register_Type_Name')
+                    ->get()
+                    ->pluck('Register_Type_Name', 'Reg_Num');
+
+                $allPayments = DB::table('fnc_student_payment as pay')
+                    ->join('fnc_reff_payment as reff', 'pay.Reff_Payment_Id', '=', 'reff.Reff_Payment_Id')
+                    ->where('pay.Is_Her', 1)
+                    ->select('reff.Register_Number', 'reff.Total_Amount')
+                    ->get()
+                    ->pluck('Total_Amount', 'Register_Number');
             }
 
-            return $this->successResponse('Student list retrieved successfully', $students, count($students));
+            if ($serverPaging) {
+                // === PAGING ===
+                $paginated = $query->paginate($perPage);
+                $termYears   = $termYears ?? [];
+                $allParents  = $allParents ?? [];
+                $allCamaru   = $allCamaru ?? [];
+                $allPayments = $allPayments ?? [];
+                $students = $paginated->through(function ($s) use ($detail, $termYears, $allParents, $allCamaru, $allPayments) {
+                    $birth = $s->Birth_Date
+                        ? TanggalIndo::tanggal(date('Y-m-d', strtotime($s->Birth_Date)), true)
+                        : null;
+                    if ($detail) {
+                        $termId = $s->Entry_Year_Id . $s->Entry_Term_Id;
+                        $masukKuliah = '';
+                        if (isset($termYears[$termId])) {
+                            $tgl = date('Y-m-d', strtotime($termYears[$termId]->Start_Date));
+                            $masukKuliah = TanggalIndo::tanggal($tgl, false);
+                        }
+
+                        $parents = $allParents[$s->Student_Id] ?? collect();
+                        $ayah = $parents->firstWhere('Parent_Type_Id', 1);
+                        $ibu  = $parents->firstWhere('Parent_Type_Id', 2);
+                        $wali = $parents->firstWhere('Parent_Type_Id', 3);
+
+                        return [
+                            'Student_Id' => $s->Student_Id,
+                            'NIM' => $s->Nim,
+                            'Nama' => $s->Full_Name,
+                            'Tempat Lahir' => $s->Birth_Place,
+                            'Tanggal Lahir' => $birth,
+                            'Jenis Kelamin' => $s->Gender_Type,
+                            'NIK' => $s->Nik,
+                            'Agama' => $s->Religion_Name,
+                            'NISN' => $s->Nisn,
+                            'Jalur Pendaftaran' => $allCamaru[$s->Register_Number] ?? '',
+                            'NPWP' => $s->Npwp,
+                            'Kewarganegaraan' => $s->Citizenship_Name,
+                            'Jenis Pendaftaran' => $s->Register_Status_Name,
+                            'Tgl Masuk Kuliah' => $masukKuliah,
+                            'Alamat' => $s->Address,
+                            'Kelurahan' => $s->Sub_District,
+                            'Kecamatan' => $s->District_Name,
+                            'Kode Pos' => $s->Zip_Code,
+                            'Transportasi' => $s->Transport_Type,
+                            'No HP' => $s->Phone_Mobile,
+                            'Email' => $s->Email_Corporate,
+                            'Terima KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
+                            'No KPS' => $s->Kps_Number,
+                            'Nama Ayah' => $ayah?->Full_Name ?? '',
+                            'Nama Ibu' => $ibu?->Full_Name ?? '',
+                            'Nama Wali' => $wali?->Full_Name ?? '',
+                            'Jumlah Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
+                        ];
+                    } else {
+                        return (array) $s;
+                    }
+                });
+                return $this->successResponse('Student fetched successfully', $students, 200, $serverPaging, $students);
+            } else {
+                // === NON PAGING ===
+                foreach ($query->cursor() as $s) {
+                    $birth = TanggalIndo::tanggal(date('Y-m-d', strtotime($s->Birth_Date)), true);
+
+                    if ($detail) {
+                        $termId = $s->Entry_Year_Id . $s->Entry_Term_Id;
+                        $masukKuliah = '';
+                        if (isset($termYears[$termId])) {
+                            $tgl = date('Y-m-d', strtotime($termYears[$termId]->Start_Date));
+                            $masukKuliah = TanggalIndo::tanggal($tgl, false);
+                        }
+
+                        $parents = $allParents[$s->Student_Id] ?? collect();
+                        $ayah = $parents->firstWhere('Parent_Type_Id', 1);
+                        $ibu  = $parents->firstWhere('Parent_Type_Id', 2);
+                        $wali = $parents->firstWhere('Parent_Type_Id', 3);
+
+                        $students[] = [
+                            'Student_Id' => $s->Student_Id,
+                            'NIM' => $s->Nim,
+                            'Nama' => $s->Full_Name,
+                            'Tempat Lahir' => $s->Birth_Place,
+                            'Tanggal Lahir' => $birth,
+                            'Jenis Kelamin' => $s->Gender_Type,
+                            'NIK' => $s->Nik,
+                            'Agama' => $s->Religion_Name,
+                            'NISN' => $s->Nisn,
+                            'Jalur Pendaftaran' => $allCamaru[$s->Register_Number] ?? '',
+                            'NPWP' => $s->Npwp,
+                            'Kewarganegaraan' => $s->Citizenship_Name,
+                            'Jenis Pendaftaran' => $s->Register_Status_Name,
+                            'Tgl Masuk Kuliah' => $masukKuliah,
+                            'Alamat' => $s->Address,
+                            'Kelurahan' => $s->Sub_District,
+                            'Kecamatan' => $s->District_Name,
+                            'Kode Pos' => $s->Zip_Code,
+                            'Transportasi' => $s->Transport_Type,
+                            'No HP' => $s->Phone_Mobile,
+                            'Email' => $s->Email_Corporate,
+                            'Terima KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
+                            'No KPS' => $s->Kps_Number,
+                            'Nama Ayah' => $ayah?->Full_Name ?? '',
+                            'Nama Ibu' => $ibu?->Full_Name ?? '',
+                            'Nama Wali' => $wali?->Full_Name ?? '',
+                            'Jumlah Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
+                        ];
+                    } else {
+                        $students[] = (array) $s;
+                    }
+                }
+
+                return $this->successResponse('Student fetched successfully', $students, 200, $serverPaging);
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse('Validation failed', $e->errors(), 422);
         } catch (\Exception $e) {

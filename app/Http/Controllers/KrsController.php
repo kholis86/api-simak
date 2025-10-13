@@ -124,70 +124,124 @@ class KrsController extends Controller
     {
         try {
             $request->validate([
-                'Student_Id'   => 'required|integer',
-                'Term_Year_Id' => 'nullable|integer',
+                'student_id'   => 'nullable',
+                'term_year_id' => 'nullable|integer',
+                'department_id'  => 'nullable|integer',
             ]);
 
-            $studentId = $request->Student_Id;
-            $termYearId = $request->Term_Year_Id;
+            // $studentIds = $request->student_id
+            //     ? (is_array($request->student_id) ? $request->student_id : [$request->student_id])
+            //     : [];
+            $studentIds = $request->student_id
+                ? (is_array($request->student_id)
+                    ? $request->student_id
+                    : explode(',', $request->student_id))
+                : [];
+            $termYearId = $request->term_year_id;
+            $departmentId = $request->department_id;
+            $serverPaging = filter_var($request->server_paging, FILTER_VALIDATE_BOOLEAN);
 
-            $student = DB::table('acd_student')
-                ->select('Student_Id', 'Full_Name', 'Nim')
-                ->where('Student_Id', $studentId)
-                ->first();
+            // Ambil mahasiswa (bisa semua, bisa beberapa)
+            $studentsQuery = DB::table('acd_student')
+                ->select('Student_Id', 'Full_Name', 'Nim', 'Department_Id')
+                ->when(!empty($studentIds), fn($q) => $q->whereIn('Student_Id', $studentIds))
+                ->when($departmentId, fn($q) => $q->where('Department_Id', $departmentId))
+                ->orderBy('Student_Id');
 
-            if (!$student) {
-                return $this->errorResponse('Student not found', 'Student not found', 404);
+            if ($serverPaging) {
+                $students = $studentsQuery->paginate($request->get('per_page', 20));
+            } else {
+                $students = $studentsQuery->get();
             }
 
-            $krsQuery = DB::table('acd_student_krs as k')
+            if ($students->isEmpty()) {
+                return $this->errorResponse('No students found', 'No students found', 404);
+            }
+
+            // Ambil data KRS dengan streaming
+            $krsQuery = DB::table('acd_student_krs as krs')
                 ->select(
-                    'k.Krs_Id',
-                    'k.Term_Year_Id',
-                    'k.Course_Id',
+                    'krs.Student_Id',
+                    'krs.Krs_Id',
+                    'krs.Term_Year_Id',
+                    'krs.Course_Id',
                     'c.Course_Code',
                     'c.Course_Name',
-                    'k.Sks',
-                    'k.Class_Prog_Id',
+                    'krs.Sks',
+                    'krs.Class_Prog_Id',
                     'cp.Class_Program_Name',
-                    'k.Class_Id',
+                    'krs.Class_Id',
                     'cl.Class_Name'
                 )
-                ->leftJoin('acd_course as c', 'k.Course_Id', '=', 'c.Course_Id')
-                ->leftJoin('mstr_class_program as cp', 'k.Class_Prog_Id', '=', 'cp.Class_Prog_Id')
-                ->leftJoin('mstr_class as cl', 'k.Class_Id', '=', 'cl.Class_Id')
-                ->where('k.Student_Id', $studentId);
-
-            if ($termYearId) {
-                $krsQuery->where('k.Term_Year_Id', $termYearId);
-            }
+                ->join('acd_course as c', 'krs.Course_Id', '=', 'c.Course_Id')
+                ->leftJoin('mstr_class_program as cp', 'krs.Class_Prog_Id', '=', 'cp.Class_Prog_Id')
+                ->leftJoin('mstr_class as cl', 'krs.Class_Id', '=', 'cl.Class_Id')
+                ->when(!empty($studentIds), fn($q) => $q->whereIn('krs.Student_Id', $studentIds))
+                ->when($termYearId, fn($q) => $q->where('krs.Term_Year_Id', $termYearId))
+                ->when($departmentId, function ($q) use ($departmentId) {
+                    $q->join('acd_student as s', 'krs.Student_Id', '=', 's.Student_Id')
+                        ->where('s.Department_Id', $departmentId);
+                })
+                ->orderBy('krs.Student_Id');
 
             $krsCursor = $krsQuery->cursor();
 
-            $krsData = [];
+            // Group manual (hemat memori)
+            $groupedKrs = [];
             foreach ($krsCursor as $row) {
-                $krsData[] = [
-                    'Krs_Id'          => $row->Krs_Id,
-                    'Term_Year_Id'    => $row->Term_Year_Id,
-                    'Course_Id'       => $row->Course_Id,
-                    'Course_Code'     => $row->Course_Code,
-                    'Course_Name'     => $row->Course_Name,
-                    'Sks'             => $row->Sks,
-                    'Class_Prog_Id'   => $row->Class_Prog_Id,
+                $groupedKrs[$row->Student_Id][] = [
+                    'Krs_Id'            => $row->Krs_Id,
+                    'Term_Year_Id'      => $row->Term_Year_Id,
+                    'Course_Id'         => $row->Course_Id,
+                    'Course_Code'       => $row->Course_Code,
+                    'Course_Name'       => $row->Course_Name,
+                    'Sks'               => $row->Sks,
+                    'Class_Prog_Id'     => $row->Class_Prog_Id,
                     'Class_Program_Name' => $row->Class_Program_Name,
-                    'Class_Id'        => $row->Class_Id,
-                    'Class_Name'      => $row->Class_Name,
+                    'Class_Id'          => $row->Class_Id,
+                    'Class_Name'        => $row->Class_Name,
                 ];
             }
 
-            $data = [
-                'Student_Id' => $student->Student_Id,
-                'Full_Name'  => $student->Full_Name,
-                'Nim'        => $student->Nim,
-                'Krs'        => $krsData
-            ];
+            // Gabungkan hasil akhir
+            $studentsData = [];
+            foreach ($students as $student) {
+                $krsData = $groupedKrs[$student->Student_Id] ?? [];
+                $studentsData[] = [
+                    'Student_Id'   => $student->Student_Id,
+                    'Full_Name'    => $student->Full_Name,
+                    'Nim'          => $student->Nim,
+                    'Department_Id' => $student->Department_Id,
+                    'Total_Krs'    => count($krsData),
+                    'Krs'          => $krsData,
+                ];
+            }
 
-            return $this->successResponse('Student KRS retrieved successfully', $data, count($krsData));
+            if ($serverPaging) {
+                // Buat paginator sementara dari array manual
+                $studentsDataPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $studentsData,                // items array
+                    $students->total(),           // total dari query paginator
+                    $students->perPage(),         // per page
+                    $students->currentPage(),     // current page
+                    ['path' => request()->url()]  // path untuk pagination link
+                );
+
+                return $this->successResponse(
+                    'KRS fetched successfully',
+                    $studentsDataPaginator, // tetap instance LengthAwarePaginator
+                    200,
+                    $serverPaging,
+                    $studentsDataPaginator
+                );
+            } else {
+                return $this->successResponse(
+                    'KRS fetched successfully',
+                    $studentsData,          // array biasa kalau tidak paging
+                    200,
+                    $serverPaging
+                );
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse('Validation failed', $e->errors(), 422);
         } catch (\Exception $e) {

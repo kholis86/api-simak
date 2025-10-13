@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\AcdStudent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Traits\ApiResponseTrait;
+use App\Helpers\TanggalIndo;
 
-class StudentController extends Controller
+class StudentControllerOLD extends Controller
 {
     /**
      * @OA\Get(
@@ -35,10 +38,10 @@ class StudentController extends Controller
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Parameter(
-     *         name="page",
+     *         name="entry_year",
      *         in="query",
      *         required=false,
-     *         description="paging",
+     *         description="Filter by Entry Year Id",
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\Response(
@@ -52,7 +55,7 @@ class StudentController extends Controller
      *                 @OA\Items(
      *                     @OA\Property(property="Student_Id", type="integer", example=1),
      *                     @OA\Property(property="Nim", type="string", example="20220500075"),
-     *                     @OA\Property(property="Register_Number", type="string", example="REG123"),
+     *                     @OA\Property(property="Register_Number", type="string", example="123456"),
      *                     @OA\Property(property="Full_Name", type="string", example="Budi Santoso"),
      *                     @OA\Property(property="Department", type="string", example="Teknik Informatika"),
      *                     @OA\Property(property="Class_Program", type="string", example="Reguler"),
@@ -99,7 +102,7 @@ class StudentController extends Controller
      * )
      */
 
-
+    use ApiResponseTrait;
 
     public function studentData(Request $request)
     {
@@ -111,81 +114,66 @@ class StudentController extends Controller
                 'department_id' => 'nullable|integer',
             ]);
 
-            $query = AcdStudent::with([
-                'department',
-                'classProgram',
-                'religion',
-                'maritalStatus'
-            ]);
+            $students = [];
 
-            // filter by Nim
-            if ($request->filled('nim')) {
-                $query->where('Nim', $request->nim);
-            }
+            $query = DB::table('acd_student as s')
+                ->leftJoin('mstr_department as d', 's.Department_Id', '=', 'd.Department_Id')
+                ->leftJoin('mstr_class_program as cp', 's.Class_Prog_Id', '=', 'cp.Class_Prog_Id')
+                ->leftJoin('mstr_religion as r', 's.Religion_Id', '=', 'r.Religion_Id')
+                ->leftJoin('mstr_marital_status as m', 's.Marital_Status_Id', '=', 'm.Marital_Status_Id')
+                ->select(
+                    's.Student_Id',
+                    's.Nim',
+                    's.Register_Number',
+                    's.Full_Name',
+                    'd.Department_Name as Department',
+                    'cp.Class_Program_Name as Class_Program',
+                    'r.Religion_Name as Religion',
+                    'm.Marital_Status_Type as Marital_Status',
+                    's.Birth_Place',
+                    's.Birth_Date',
+                    's.Entry_Year_Id',
+                    's.Entry_Term_Id',
+                    's.Nisn',
+                    's.Nik',
+                    's.Email_Corporate',
+                    's.Phone_Mobile'
+                );
 
-            // filter by Register Number
-            if ($request->filled('register_number')) {
-                $query->where('Register_Number', $request->register_number);
-            }
+            // filter
+            if ($request->filled('student_id')) $query->where('s.Student_Id', $request->student_id);
+            if ($request->filled('nim')) $query->where('s.Nim', $request->nim);
+            if ($request->filled('register_number')) $query->where('s.Register_Number', $request->register_number);
+            if ($request->filled('department_id')) $query->where('s.Department_Id', $request->department_id);
+            if ($request->filled('entry_year')) $query->where('s.Entry_Year_Id', $request->entry_year);
 
-            // filter by Department
-            if ($request->filled('department_id')) {
-                $query->where('Department_Id', $request->department_id);
-            }
-
-            // paginate biar lebih efisien
-            $students = $query->paginate(20);
-
-            // mapping data
-            $students->getCollection()->transform(function ($student) {
-                return [
+            // gunakan cursor untuk streaming → 1 query → memory ringan
+            foreach ($query->orderBy('s.Student_Id')->cursor() as $student) {
+                $students[] = [
                     'Student_Id'       => $student->Student_Id,
                     'Nim'              => $student->Nim,
                     'Register_Number'  => $student->Register_Number,
                     'Full_Name'        => $student->Full_Name,
-                    'Department'       => $student->department?->Department_Name,
-                    'Class_Program'    => $student->classProgram?->Class_Prog_Name,
-                    'Religion'         => $student->religion?->Religion_Name,
-                    'Marital_Status'   => $student->maritalStatus?->Marital_Status_Name,
-                    'Birth_Place'      => $student->Bhirt_Place,
-                    'Birth_Date'       => $student->Bhirt_Date,
-                    'Entry_Year'       => $student->Entry_Year,
+                    'Department'       => $student->Department,
+                    'Class_Program'    => $student->Class_Program,
+                    'Religion'         => $student->Religion,
+                    'Marital_Status'   => $student->Marital_Status,
+                    'Birth_Place'      => $student->Birth_Place,
+                    'Birth_Date'       => $student->Birth_Date,
+                    'Entry_Year'       => $student->Entry_Year_Id,
                     'Entry_Term_Id'    => $student->Entry_Term_Id,
                     'Nisn'             => $student->Nisn,
                     'Nik'              => $student->Nik,
                     'Email_Corporate'  => $student->Email_Corporate,
                     'Phone_Mobile'     => $student->Phone_Mobile,
                 ];
-            });
+            }
 
-            return response()->json([
-                'success' => true,
-                'code'    => 200,
-                'message' => 'Student list retrieved successfully',
-                'data'    => $students->items(),
-                'meta'    => [
-                    'current_page' => $students->currentPage(),
-                    'per_page'     => $students->perPage(),
-                    'total'        => $students->total(),
-                    'last_page'    => $students->lastPage(),
-                ]
-            ], 200);
+            return $this->successResponse('Student list retrieved successfully', $students, count($students));
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'code'    => 422,
-                'message' => 'Validation failed',
-                'errors'  => $e->errors(),
-                'data'    => []
-            ], 422);
+            return $this->errorResponse('Validation failed', $e->errors(), 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'code'    => 500,
-                'message' => 'Internal server error',
-                'error'   => $e->getMessage(),
-                'data'    => []
-            ], 500);
+            return $this->errorResponse('Internal server error', $e->getMessage(), 500);
         }
     }
 }
