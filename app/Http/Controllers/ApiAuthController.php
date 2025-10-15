@@ -10,29 +10,42 @@ class ApiAuthController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/login",
-     *     tags={"Auth"},
-     *     summary="Login to get API token",
-     *     description="Authenticate user with username & password, returns Bearer token",
+     *     path="/api/token/login",
+     *     tags={"API Auth"},
+     *     summary="Login dan dapatkan token",
+     *     description="Autentikasi user API, mengembalikan plainText token dan expired_at",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"username","password"},
-     *             @OA\Property(property="username", type="string", example="api-simak"),
-     *             @OA\Property(property="password", type="string", example="password")
+     *             @OA\Property(property="username", type="string", example="user1"),
+     *             @OA\Property(property="password", type="string", example="secret123")
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Successful login",
+     *         description="Login successful",
      *         @OA\JsonContent(
-     *             @OA\Property(property="token", type="string", example="1|abcdef123456..."),
-     *             @OA\Property(property="expired_at", type="string", example="2025-09-29 14:30:00")
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Login successful"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="token", type="string", example="plain_text_token_here"),
+     *                 @OA\Property(property="expired_at", type="string", format="date-time", example="2025-10-16 12:34:56")
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Invalid credentials"
+     *         description="Invalid credentials",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=401),
+     *             @OA\Property(property="message", type="string", example="Invalid Token credentials"),
+     *             @OA\Property(property="data", type="null", nullable=true)
+     *         )
      *     )
      * )
      */
@@ -49,7 +62,7 @@ class ApiAuthController extends Controller
             return response()->json([
                 'success' => false,
                 'code'    => 401,
-                'message' => 'Invalid credentials',
+                'message' => 'Invalid Token credentials',
                 'data'    => null
             ], 401);
         }

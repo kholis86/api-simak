@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 /**
  * @OA\Info(
  *     title="Sistem Akademik API",
- *     version="1.0.0",
- *     description="Dokumentasi API untuk login, student, dan master data"
+ *     version="1.2.0",
+ *     description="Dokumentasi API untuk login, student, dan master data,KRS,AKM"
  * )
  *
  * @OA\Server(

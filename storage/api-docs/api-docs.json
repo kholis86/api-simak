@@ -2,8 +2,8 @@
     "openapi": "3.0.0",
     "info": {
         "title": "Sistem Akademik API",
-        "description": "Dokumentasi API untuk login, student, dan master data",
-        "version": "1.0.0"
+        "description": "Dokumentasi API untuk login, student, dan master data,KRS,AKM",
+        "version": "1.2.0"
     },
     "servers": [
         {
@@ -12,14 +12,14 @@
         }
     ],
     "paths": {
-        "/api/login": {
+        "/api/token/login": {
             "post": {
                 "tags": [
-                    "Auth"
+                    "API Auth"
                 ],
-                "summary": "Login to get API token",
-                "description": "Authenticate user with username & password, returns Bearer token",
-                "operationId": "adbe720dc4dcedd623b9794954f55254",
+                "summary": "Login dan dapatkan token",
+                "description": "Autentikasi user API, mengembalikan plainText token dan expired_at",
+                "operationId": "1db45b78b044a87c7bae7fc3136f69e6",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -32,11 +32,11 @@
                                 "properties": {
                                     "username": {
                                         "type": "string",
-                                        "example": "api-simak"
+                                        "example": "user1"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "example": "password"
+                                        "example": "secret123"
                                     }
                                 },
                                 "type": "object"
@@ -46,64 +46,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful login",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "token": {
-                                            "type": "string",
-                                            "example": "1|abcdef123456..."
-                                        },
-                                        "expired_at": {
-                                            "type": "string",
-                                            "example": "2025-09-29 14:30:00"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Invalid credentials"
-                    }
-                }
-            }
-        },
-        "/api/student-khs": {
-            "get": {
-                "tags": [
-                    "KHS"
-                ],
-                "summary": "Get student KHS",
-                "description": "Ambil data KHS mahasiswa berdasarkan Student_Id (wajib) dan Term_Year_Id (opsional)",
-                "operationId": "661c61aad2a0cf94064dab25b87f027f",
-                "parameters": [
-                    {
-                        "name": "Student_Id",
-                        "in": "query",
-                        "description": "ID mahasiswa",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 12345
-                        }
-                    },
-                    {
-                        "name": "Term_Year_Id",
-                        "in": "query",
-                        "description": "ID tahun akademik (opsional)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 20241
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Student KHS retrieved successfully",
+                        "description": "Login successful",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -118,72 +61,18 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Student KHS retrieved successfully"
+                                            "example": "Login successful"
                                         },
                                         "data": {
                                             "properties": {
-                                                "Student_Id": {
-                                                    "type": "integer",
-                                                    "example": 12345
-                                                },
-                                                "Full_Name": {
+                                                "token": {
                                                     "type": "string",
-                                                    "example": "Ahmad Budi"
+                                                    "example": "plain_text_token_here"
                                                 },
-                                                "Nim": {
+                                                "expired_at": {
                                                     "type": "string",
-                                                    "example": "210101001"
-                                                },
-                                                "Khs": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "Krs_Id": {
-                                                                "type": "integer",
-                                                                "example": 1001
-                                                            },
-                                                            "Course_Id": {
-                                                                "type": "integer",
-                                                                "example": 2001
-                                                            },
-                                                            "Course_Code": {
-                                                                "type": "string",
-                                                                "example": "IF101"
-                                                            },
-                                                            "Course_Name": {
-                                                                "type": "string",
-                                                                "example": "Algoritma & Pemrograman"
-                                                            },
-                                                            "Sks": {
-                                                                "type": "integer",
-                                                                "example": 3
-                                                            },
-                                                            "Grade_Letter_Id": {
-                                                                "type": "string",
-                                                                "example": "A"
-                                                            },
-                                                            "Weight_Value": {
-                                                                "type": "number",
-                                                                "format": "float",
-                                                                "example": 4
-                                                            },
-                                                            "Bnk_Value": {
-                                                                "type": "number",
-                                                                "format": "float",
-                                                                "example": 12
-                                                            }
-                                                        },
-                                                        "type": "object"
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "meta": {
-                                            "properties": {
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 5
+                                                    "format": "date-time",
+                                                    "example": "2025-10-16 12:34:56"
                                                 }
                                             },
                                             "type": "object"
@@ -194,8 +83,173 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 401
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid Token credentials"
+                                        },
+                                        "data": {
+                                            "type": "null",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/student-khs": {
+            "get": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Get Student KHS Data",
+                "description": "Mengambil data KHS (Kartu Hasil Studi) mahasiswa berdasarkan filter student_id, term_year_id, dan department_id.",
+                "operationId": "studentKhs",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "description": "Bisa single ID, array, atau daftar ID dipisahkan koma (contoh: 1001,1002,1003)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "1001,1002"
+                        }
+                    },
+                    {
+                        "name": "term_year_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan tahun ajaran",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20241
+                        }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan department",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "server_paging",
+                        "in": "query",
+                        "description": "Aktifkan pagination server-side (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman (hanya jika server_paging=true)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "KHS fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KHS fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "current_page": 1,
+                                                "per_page": 20,
+                                                "total": 2,
+                                                "data": [
+                                                    {
+                                                        "Student_Id": 1001,
+                                                        "Full_Name": "Budi Santoso",
+                                                        "Nim": "21010001",
+                                                        "Department_Id": 5,
+                                                        "Total_Khs": 3,
+                                                        "Khs": [
+                                                            {
+                                                                "Krs_Id": 1,
+                                                                "Term_Year_Id": 20241,
+                                                                "Course_Id": 201,
+                                                                "Course_Code": "IF201",
+                                                                "Course_Name": "Algoritma dan Pemrograman",
+                                                                "Sks": 3,
+                                                                "Class_Prog_Id": 2,
+                                                                "Class_Program_Name": "Reguler Pagi",
+                                                                "Class_Id": 1,
+                                                                "Class_Name": "A",
+                                                                "Grade_Letter": "A",
+                                                                "Weight_Value": 4,
+                                                                "Bnk_Value": 90
+                                                            },
+                                                            {
+                                                                "Krs_Id": 2,
+                                                                "Term_Year_Id": 20241,
+                                                                "Course_Id": 205,
+                                                                "Course_Code": "IF205",
+                                                                "Course_Name": "Basis Data",
+                                                                "Sks": 3,
+                                                                "Class_Prog_Id": 2,
+                                                                "Class_Program_Name": "Reguler Pagi",
+                                                                "Class_Id": 2,
+                                                                "Class_Name": "B",
+                                                                "Grade_Letter": "B+",
+                                                                "Weight_Value": 3.5,
+                                                                "Bnk_Value": 85
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
                     "404": {
-                        "description": "Student not found",
+                        "description": "No students found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -210,11 +264,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Student not found"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {}
+                                            "example": "No students found"
                                         }
                                     },
                                     "type": "object"
@@ -240,17 +290,13 @@
                                             "type": "string",
                                             "example": "Validation failed"
                                         },
-                                        "errors": {
+                                        "data": {
                                             "type": "object",
                                             "example": {
-                                                "Student_Id": [
-                                                    "The Student_Id field is required."
+                                                "term_year_id": [
+                                                    "The term_year_id field must be an integer."
                                                 ]
                                             }
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {}
                                         }
                                     },
                                     "type": "object"
@@ -275,14 +321,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Internal server error"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "SQLSTATE[42S22]: Column not found"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {}
                                         }
                                     },
                                     "type": "object"
@@ -301,36 +339,66 @@
         "/api/student-krs": {
             "get": {
                 "tags": [
-                    "KRS"
+                    "Academic"
                 ],
-                "summary": "Get KRS data of a student",
-                "description": "Ambil data KRS berdasarkan Student_Id dan opsional Term_Year_Id",
-                "operationId": "cf674f4dbebcdffd63048604bd1b3b02",
+                "summary": "Get Student KRS Data",
+                "description": "Menampilkan data KRS (Kartu Rencana Studi) mahasiswa berdasarkan filter student_id, term_year_id, dan department_id.",
+                "operationId": "studentKrs",
                 "parameters": [
                     {
-                        "name": "Student_Id",
+                        "name": "student_id",
                         "in": "query",
-                        "description": "ID mahasiswa",
-                        "required": true,
+                        "description": "Bisa single ID, array, atau daftar ID dipisahkan koma (contoh: 1001,1002,1003)",
+                        "required": false,
                         "schema": {
-                            "type": "integer",
-                            "example": 2422
+                            "type": "string",
+                            "example": "1001,1002"
                         }
                     },
                     {
-                        "name": "Term_Year_Id",
+                        "name": "term_year_id",
                         "in": "query",
-                        "description": "ID tahun ajaran (opsional)",
+                        "description": "Filter berdasarkan tahun ajaran",
                         "required": false,
                         "schema": {
                             "type": "integer",
                             "example": 20241
                         }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan department",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "server_paging",
+                        "in": "query",
+                        "description": "Aktifkan pagination server-side (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman (hanya jika server_paging=true)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Student KRS retrieved successfully",
+                        "description": "KRS fetched successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -345,104 +413,50 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Student KRS retrieved successfully"
+                                            "example": "KRS fetched successfully"
                                         },
                                         "data": {
-                                            "properties": {
-                                                "Student_Id": {
-                                                    "type": "integer",
-                                                    "example": 2422
-                                                },
-                                                "Full_Name": {
-                                                    "type": "string",
-                                                    "example": "Budi Santoso"
-                                                },
-                                                "Nim": {
-                                                    "type": "string",
-                                                    "example": "202300123"
-                                                },
-                                                "Krs": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "properties": {
-                                                            "Krs_Id": {
-                                                                "type": "integer",
-                                                                "example": 101
+                                            "type": "object",
+                                            "example": {
+                                                "current_page": 1,
+                                                "per_page": 20,
+                                                "total": 2,
+                                                "data": [
+                                                    {
+                                                        "Student_Id": 1001,
+                                                        "Full_Name": "Budi Santoso",
+                                                        "Nim": "21010001",
+                                                        "Department_Id": 5,
+                                                        "Total_Krs": 3,
+                                                        "Krs": [
+                                                            {
+                                                                "Krs_Id": 1,
+                                                                "Term_Year_Id": 20241,
+                                                                "Course_Id": 201,
+                                                                "Course_Code": "IF201",
+                                                                "Course_Name": "Algoritma dan Pemrograman",
+                                                                "Sks": 3,
+                                                                "Class_Prog_Id": 2,
+                                                                "Class_Program_Name": "Reguler Pagi",
+                                                                "Class_Id": 1,
+                                                                "Class_Name": "A"
                                                             },
-                                                            "Term_Year_Id": {
-                                                                "type": "integer",
-                                                                "example": 20241
-                                                            },
-                                                            "Course_Id": {
-                                                                "type": "integer",
-                                                                "example": 55
-                                                            },
-                                                            "Course_Code": {
-                                                                "type": "string",
-                                                                "example": "IF101"
-                                                            },
-                                                            "Course_Name": {
-                                                                "type": "string",
-                                                                "example": "Pemrograman Dasar"
-                                                            },
-                                                            "Sks": {
-                                                                "type": "integer",
-                                                                "example": 3
-                                                            },
-                                                            "Class_Prog_Id": {
-                                                                "type": "integer",
-                                                                "example": 1
-                                                            },
-                                                            "Class_Program_Name": {
-                                                                "type": "string",
-                                                                "example": "Reguler"
-                                                            },
-                                                            "Class_Id": {
-                                                                "type": "integer",
-                                                                "example": 2
-                                                            },
-                                                            "Class_Name": {
-                                                                "type": "string",
-                                                                "example": "A"
+                                                            {
+                                                                "Krs_Id": 2,
+                                                                "Term_Year_Id": 20241,
+                                                                "Course_Id": 205,
+                                                                "Course_Code": "IF205",
+                                                                "Course_Name": "Basis Data",
+                                                                "Sks": 3,
+                                                                "Class_Prog_Id": 2,
+                                                                "Class_Program_Name": "Reguler Pagi",
+                                                                "Class_Id": 2,
+                                                                "Class_Name": "B"
                                                             }
-                                                        },
-                                                        "type": "object"
+                                                        ]
                                                     }
-                                                }
-                                            },
-                                            "type": "object"
-                                        },
-                                        "total": {
-                                            "type": "integer",
-                                            "example": 5
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized - Token tidak valid atau tidak ada",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "code": {
-                                            "type": "integer",
-                                            "example": 401
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Authentication token not provided"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "No bearer token found"
+                                                ]
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -451,7 +465,7 @@
                         }
                     },
                     "404": {
-                        "description": "Student not found",
+                        "description": "No students found",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -466,11 +480,7 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Student not found"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "Student not found"
+                                            "example": "No students found"
                                         }
                                     },
                                     "type": "object"
@@ -496,11 +506,11 @@
                                             "type": "string",
                                             "example": "Validation failed"
                                         },
-                                        "error": {
+                                        "data": {
                                             "type": "object",
                                             "example": {
-                                                "Student_Id": [
-                                                    "The Student_Id field is required."
+                                                "student_id": [
+                                                    "The student_id field must be an integer."
                                                 ]
                                             }
                                         }
@@ -527,10 +537,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Internal server error"
-                                        },
-                                        "error": {
-                                            "type": "string",
-                                            "example": "SQLSTATE[HY000]: General error ..."
                                         }
                                     },
                                     "type": "object"
@@ -882,54 +888,79 @@
                 ]
             }
         },
-        "/api/students": {
+        "/api/offered-course": {
             "get": {
                 "tags": [
-                    "Student"
+                    "Academic"
                 ],
-                "summary": "Get student list",
-                "operationId": "394857d3d6f6e1755d52d4266e42bb1b",
+                "summary": "Get Offered Course Data",
+                "description": "Menampilkan daftar mata kuliah yang ditawarkan berdasarkan filter department, term, course, dan lainnya.",
+                "operationId": "offeredCourseData",
                 "parameters": [
                     {
-                        "name": "nim",
+                        "name": "department_id",
                         "in": "query",
-                        "description": "Filter by Nim",
+                        "description": "ID dari department (opsional)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 2
                         }
                     },
                     {
-                        "name": "register_number",
+                        "name": "term_year_id",
                         "in": "query",
-                        "description": "Filter by Register Number",
+                        "description": "ID tahun ajaran (opsional)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 20241
                         }
                     },
                     {
-                        "name": "department",
+                        "name": "course_id",
                         "in": "query",
-                        "description": "Filter by Department Id",
+                        "description": "ID mata kuliah (opsional)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 120
                         }
                     },
                     {
-                        "name": "entry_year",
+                        "name": "course_code",
                         "in": "query",
-                        "description": "Filter by Entry Year Id",
+                        "description": "Kode mata kuliah (opsional, pencarian partial)",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "example": "IF202"
+                        }
+                    },
+                    {
+                        "name": "server_paging",
+                        "in": "query",
+                        "description": "Aktifkan pagination server-side (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (hanya jika server_paging=true)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Student list retrieved successfully",
+                        "description": "Offered courses fetched successfully",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -944,82 +975,9 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Student list retrieved successfully"
+                                            "example": "Offered courses fetched successfully"
                                         },
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "Student_Id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "Nim": {
-                                                        "type": "string",
-                                                        "example": "20220500075"
-                                                    },
-                                                    "Register_Number": {
-                                                        "type": "string",
-                                                        "example": "123456"
-                                                    },
-                                                    "Full_Name": {
-                                                        "type": "string",
-                                                        "example": "Budi Santoso"
-                                                    },
-                                                    "Department": {
-                                                        "type": "string",
-                                                        "example": "Teknik Informatika"
-                                                    },
-                                                    "Class_Program": {
-                                                        "type": "string",
-                                                        "example": "Reguler"
-                                                    },
-                                                    "Religion": {
-                                                        "type": "string",
-                                                        "example": "Islam"
-                                                    },
-                                                    "Marital_Status": {
-                                                        "type": "string",
-                                                        "example": "Single"
-                                                    },
-                                                    "Birth_Place": {
-                                                        "type": "string",
-                                                        "example": "Palembang"
-                                                    },
-                                                    "Birth_Date": {
-                                                        "type": "string",
-                                                        "format": "date",
-                                                        "example": "2002-05-20"
-                                                    },
-                                                    "Entry_Year": {
-                                                        "type": "integer",
-                                                        "example": 2022
-                                                    },
-                                                    "Entry_Term_Id": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    },
-                                                    "Nisn": {
-                                                        "type": "string",
-                                                        "example": "1234567890"
-                                                    },
-                                                    "Nik": {
-                                                        "type": "string",
-                                                        "example": "167xxxxxxxxxxx"
-                                                    },
-                                                    "Email_Corporate": {
-                                                        "type": "string",
-                                                        "example": "budi@sibermu.ac.id"
-                                                    },
-                                                    "Phone_Mobile": {
-                                                        "type": "string",
-                                                        "example": "081234567890"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "meta": {
                                             "properties": {
                                                 "current_page": {
                                                     "type": "integer",
@@ -1031,11 +989,65 @@
                                                 },
                                                 "total": {
                                                     "type": "integer",
-                                                    "example": 1
+                                                    "example": 125
                                                 },
-                                                "last_page": {
-                                                    "type": "integer",
-                                                    "example": 1
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "Offered_Course_Id": {
+                                                                "type": "integer",
+                                                                "example": 150
+                                                            },
+                                                            "Department_Id": {
+                                                                "type": "integer",
+                                                                "example": 2
+                                                            },
+                                                            "Term_Year_Id": {
+                                                                "type": "integer",
+                                                                "example": 20241
+                                                            },
+                                                            "Course_Id": {
+                                                                "type": "integer",
+                                                                "example": 120
+                                                            },
+                                                            "Class_Id": {
+                                                                "type": "integer",
+                                                                "example": 5
+                                                            },
+                                                            "Class_Program_Name": {
+                                                                "type": "string",
+                                                                "example": "Reguler Pagi"
+                                                            },
+                                                            "Term_Year_Name": {
+                                                                "type": "string",
+                                                                "example": "2024/2025 Ganjil"
+                                                            },
+                                                            "Start_Date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2024-09-01"
+                                                            },
+                                                            "End_Date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-01-31"
+                                                            },
+                                                            "Course_Code": {
+                                                                "type": "string",
+                                                                "example": "IF202"
+                                                            },
+                                                            "Course_Name": {
+                                                                "type": "string",
+                                                                "example": "Pemrograman Lanjut"
+                                                            },
+                                                            "Class_Name": {
+                                                                "type": "string",
+                                                                "example": "A"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -1046,8 +1058,8 @@
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized - Invalid or missing token",
+                    "422": {
+                        "description": "Validation failed",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1058,15 +1070,11 @@
                                         },
                                         "code": {
                                             "type": "integer",
-                                            "example": 401
+                                            "example": 422
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "data": {
-                                            "type": "string",
-                                            "example": null
+                                            "example": "Validation failed"
                                         }
                                     },
                                     "type": "object"
@@ -1075,7 +1083,7 @@
                         }
                     },
                     "500": {
-                        "description": "Server error",
+                        "description": "Something went wrong",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1090,11 +1098,623 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Failed to retrieve student list"
+                                            "example": "Something went wrong"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/students": {
+            "get": {
+                "tags": [
+                    "Students"
+                ],
+                "summary": "Ambil data mahasiswa",
+                "description": "Endpoint ini digunakan untuk mengambil data mahasiswa. Dapat menampilkan versi ringkas atau detail, dengan atau tanpa pagination.",
+                "operationId": "394857d3d6f6e1755d52d4266e42bb1b",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "description": "ID mahasiswa (filter spesifik)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1234
+                        }
+                    },
+                    {
+                        "name": "nim",
+                        "in": "query",
+                        "description": "Nomor Induk Mahasiswa (filter spesifik)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 24001123
+                        }
+                    },
+                    {
+                        "name": "register_number",
+                        "in": "query",
+                        "description": "Nomor registrasi (filter spesifik)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 102030
+                        }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "ID jurusan (filter spesifik)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "entry_year",
+                        "in": "query",
+                        "description": "Tahun masuk mahasiswa",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2023
+                        }
+                    },
+                    {
+                        "name": "detail",
+                        "in": "query",
+                        "description": "Tampilkan data detail mahasiswa (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "server_paging",
+                        "in": "query",
+                        "description": "Aktifkan server-side pagination (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman (jika server_paging=true)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data mahasiswa berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
-                                        "error": {
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
                                             "type": "string",
-                                            "example": "SQLSTATE[42S22]: Column not found..."
+                                            "example": "Student fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "oneOf": [
+                                                    {
+                                                        "title": "Versi Ringkas",
+                                                        "properties": {
+                                                            "Student_Id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "Nim": {
+                                                                "type": "string",
+                                                                "example": "24001123"
+                                                            },
+                                                            "Full_Name": {
+                                                                "type": "string",
+                                                                "example": "Ahmad Setiawan"
+                                                            },
+                                                            "Department": {
+                                                                "type": "string",
+                                                                "example": "Teknik Informatika"
+                                                            },
+                                                            "Class_Program": {
+                                                                "type": "string",
+                                                                "example": "Reguler"
+                                                            },
+                                                            "Religion": {
+                                                                "type": "string",
+                                                                "example": "Islam"
+                                                            },
+                                                            "Gender_Type": {
+                                                                "type": "string",
+                                                                "example": "Laki-laki"
+                                                            },
+                                                            "Birth_Place": {
+                                                                "type": "string",
+                                                                "example": "Bandung"
+                                                            },
+                                                            "Birth_Date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2004-02-01"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "title": "Versi Detail",
+                                                        "properties": {
+                                                            "Student_Id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "NIM": {
+                                                                "type": "string",
+                                                                "example": "24001123"
+                                                            },
+                                                            "Nama": {
+                                                                "type": "string",
+                                                                "example": "Ahmad Setiawan"
+                                                            },
+                                                            "Tempat_Lahir": {
+                                                                "type": "string",
+                                                                "example": "Bandung"
+                                                            },
+                                                            "Tanggal_Lahir": {
+                                                                "type": "string",
+                                                                "example": "1 Februari 2004"
+                                                            },
+                                                            "Jenis_Kelamin": {
+                                                                "type": "string",
+                                                                "example": "Laki-laki"
+                                                            },
+                                                            "NIK": {
+                                                                "type": "string",
+                                                                "example": "3201234567890001"
+                                                            },
+                                                            "Agama": {
+                                                                "type": "string",
+                                                                "example": "Islam"
+                                                            },
+                                                            "NISN": {
+                                                                "type": "string",
+                                                                "example": "9999999999"
+                                                            },
+                                                            "Jalur_Pendaftaran": {
+                                                                "type": "string",
+                                                                "example": "SNBP"
+                                                            },
+                                                            "NPWP": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Kewarganegaraan": {
+                                                                "type": "string",
+                                                                "example": "Indonesia"
+                                                            },
+                                                            "Jenis_Pendaftaran": {
+                                                                "type": "string",
+                                                                "example": "Baru"
+                                                            },
+                                                            "Tgl_Masuk_Kuliah": {
+                                                                "type": "string",
+                                                                "example": "10 Agustus 2023"
+                                                            },
+                                                            "Alamat": {
+                                                                "type": "string",
+                                                                "example": "Jl. Soekarno-Hatta No. 10"
+                                                            },
+                                                            "Kelurahan": {
+                                                                "type": "string",
+                                                                "example": "Sukapura"
+                                                            },
+                                                            "Kecamatan": {
+                                                                "type": "string",
+                                                                "example": "Cibiru"
+                                                            },
+                                                            "Kode_Pos": {
+                                                                "type": "string",
+                                                                "example": "40293"
+                                                            },
+                                                            "Transportasi": {
+                                                                "type": "string",
+                                                                "example": "Motor"
+                                                            },
+                                                            "No_HP": {
+                                                                "type": "string",
+                                                                "example": "08123456789"
+                                                            },
+                                                            "Email": {
+                                                                "type": "string",
+                                                                "example": "ahmad@student.univ.ac.id"
+                                                            },
+                                                            "Terima_KPS": {
+                                                                "type": "string",
+                                                                "example": "Tidak"
+                                                            },
+                                                            "No_KPS": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Ayah_Name": {
+                                                                "type": "string",
+                                                                "example": "Budi Setiawan"
+                                                            },
+                                                            "Ayah_Education_Type_Name": {
+                                                                "type": "string",
+                                                                "example": "S1"
+                                                            },
+                                                            "Ayah_Job_Category_Name": {
+                                                                "type": "string",
+                                                                "example": "Wiraswasta"
+                                                            },
+                                                            "Ayah_Income": {
+                                                                "type": "number",
+                                                                "example": 7000000
+                                                            },
+                                                            "Ibu_Name": {
+                                                                "type": "string",
+                                                                "example": "Siti Aminah"
+                                                            },
+                                                            "Ibu_Education_Type_Name": {
+                                                                "type": "string",
+                                                                "example": "SMA"
+                                                            },
+                                                            "Ibu_Job_Category_Name": {
+                                                                "type": "string",
+                                                                "example": "Ibu Rumah Tangga"
+                                                            },
+                                                            "Ibu_Income": {
+                                                                "type": "number",
+                                                                "example": 0
+                                                            },
+                                                            "Wali_Name": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Wali_Education_Type_Name": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Wali_Job_Category_Name": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Wali_Income": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Jumlah_Biaya_Masuk": {
+                                                                "type": "number",
+                                                                "example": 7500000
+                                                            },
+                                                            "Jenis_Pembiayaan": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "SKS_Diakui": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Asal_Perguruan_Tinggi": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            },
+                                                            "Asal_Program_Studi": {
+                                                                "type": "string",
+                                                                "example": "-"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "data": {
+                                            "type": "object",
+                                            "example": {
+                                                "nim": [
+                                                    "The nim must be an integer."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server internal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Internal server error"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/akm": {
+            "get": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Get Academic Performance (AKM) data of students",
+                "description": "Menampilkan data AKM (Aktivitas Kuliah Mahasiswa) per mahasiswa berdasarkan filter department, tahun masuk, dan pagination opsional.",
+                "operationId": "ac6a1b5bbe819b4f8c8bfe3a5ed374dd",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "description": "ID Mahasiswa (opsional, bisa untuk 1 mahasiswa)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "nim",
+                        "in": "query",
+                        "description": "Nomor Induk Mahasiswa (opsional)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID departemen",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "entry_year",
+                        "in": "query",
+                        "description": "Tahun masuk mahasiswa (Entry_Year_Id)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "server_paging",
+                        "in": "query",
+                        "description": "Aktifkan pagination server-side (true/false)",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah data per halaman jika server_paging = true",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "AKM fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "AKM fetched successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "nama": {
+                                                        "type": "string",
+                                                        "example": "Budi Santoso"
+                                                    },
+                                                    "nim": {
+                                                        "type": "string",
+                                                        "example": "22011001"
+                                                    },
+                                                    "akm": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "term_year_id": {
+                                                                    "type": "integer",
+                                                                    "example": 20241
+                                                                },
+                                                                "sks": {
+                                                                    "type": "integer",
+                                                                    "example": 20
+                                                                },
+                                                                "sks_kumulatif": {
+                                                                    "type": "integer",
+                                                                    "example": 120
+                                                                },
+                                                                "bnk_total": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 65.5
+                                                                },
+                                                                "ipk": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 3.25
+                                                                },
+                                                                "ipk_kumulatif": {
+                                                                    "type": "number",
+                                                                    "format": "float",
+                                                                    "example": 3.22
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 422
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validation failed"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Something went wrong"
+                                        },
+                                        "data": {
+                                            "type": "string",
+                                            "example": "SQLSTATE[42S22]: Column not found: 1054 Unknown column..."
                                         }
                                     },
                                     "type": "object"
@@ -1122,24 +1742,20 @@
     },
     "tags": [
         {
-            "name": "Auth",
-            "description": "Auth"
+            "name": "API Auth",
+            "description": "API Auth"
         },
         {
-            "name": "KHS",
-            "description": "KHS"
-        },
-        {
-            "name": "KRS",
-            "description": "KRS"
+            "name": "Academic",
+            "description": "Academic"
         },
         {
             "name": "Master",
             "description": "Master"
         },
         {
-            "name": "Student",
-            "description": "Student"
+            "name": "Students",
+            "description": "Students"
         }
     ]
 }
