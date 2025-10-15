@@ -8,6 +8,113 @@ use Illuminate\Support\Facades\DB;
 
 class OfferedCourseController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/offered-course",
+     *     summary="Get Offered Course Data",
+     *     description="Menampilkan daftar mata kuliah yang ditawarkan berdasarkan filter department, term, course, dan lainnya.",
+     *     operationId="offeredCourseData",
+     *     security={{"bearerAuth":{}}},
+     *     tags={"Academic"},
+     *
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         required=false,
+     *         description="ID dari department (opsional)",
+     *         @OA\Schema(type="integer", example=2)
+     *     ),
+     *     @OA\Parameter(
+     *         name="term_year_id",
+     *         in="query",
+     *         required=false,
+     *         description="ID tahun ajaran (opsional)",
+     *         @OA\Schema(type="integer", example=20241)
+     *     ),
+     *     @OA\Parameter(
+     *         name="course_id",
+     *         in="query",
+     *         required=false,
+     *         description="ID mata kuliah (opsional)",
+     *         @OA\Schema(type="integer", example=120)
+     *     ),
+     *     @OA\Parameter(
+     *         name="course_code",
+     *         in="query",
+     *         required=false,
+     *         description="Kode mata kuliah (opsional, pencarian partial)",
+     *         @OA\Schema(type="string", example="IF202")
+     *     ),
+     *     @OA\Parameter(
+     *         name="server_paging",
+     *         in="query",
+     *         required=false,
+     *         description="Aktifkan pagination server-side (true/false)",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Jumlah item per halaman (hanya jika server_paging=true)",
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Offered courses fetched successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Offered courses fetched successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=20),
+     *                 @OA\Property(property="total", type="integer", example=125),
+     *                 @OA\Property(
+     *                     property="data",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         @OA\Property(property="Offered_Course_Id", type="integer", example=150),
+     *                         @OA\Property(property="Department_Id", type="integer", example=2),
+     *                         @OA\Property(property="Term_Year_Id", type="integer", example=20241),
+     *                         @OA\Property(property="Course_Id", type="integer", example=120),
+     *                         @OA\Property(property="Class_Id", type="integer", example=5),
+     *                         @OA\Property(property="Class_Program_Name", type="string", example="Reguler Pagi"),
+     *                         @OA\Property(property="Term_Year_Name", type="string", example="2024/2025 Ganjil"),
+     *                         @OA\Property(property="Start_Date", type="string", format="date", example="2024-09-01"),
+     *                         @OA\Property(property="End_Date", type="string", format="date", example="2025-01-31"),
+     *                         @OA\Property(property="Course_Code", type="string", example="IF202"),
+     *                         @OA\Property(property="Course_Name", type="string", example="Pemrograman Lanjut"),
+     *                         @OA\Property(property="Class_Name", type="string", example="A")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=422),
+     *             @OA\Property(property="message", type="string", example="Validation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Something went wrong",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=500),
+     *             @OA\Property(property="message", type="string", example="Something went wrong")
+     *         )
+     *     )
+     * )
+     */
+
     use ApiResponseTrait;
     public function offeredCourseData(Request $request)
     {

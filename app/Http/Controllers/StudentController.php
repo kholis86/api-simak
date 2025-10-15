@@ -10,99 +10,176 @@ use App\Helpers\TanggalIndo;
 
 class StudentController extends Controller
 {
+    use ApiResponseTrait;
+
     /**
      * @OA\Get(
      *     path="/api/students",
-     *     summary="Get student list",
+     *     tags={"Students"},
+     *     summary="Ambil data mahasiswa",
+     *     description="Endpoint ini digunakan untuk mengambil data mahasiswa. Dapat menampilkan versi ringkas atau detail, dengan atau tanpa pagination.",
      *     security={{"bearerAuth":{}}},
-     *     tags={"Student"},
+     *
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="query",
+     *         required=false,
+     *         description="ID mahasiswa (filter spesifik)",
+     *         @OA\Schema(type="integer", example=1234)
+     *     ),
      *     @OA\Parameter(
      *         name="nim",
      *         in="query",
      *         required=false,
-     *         description="Filter by Nim",
-     *         @OA\Schema(type="integer")
+     *         description="Nomor Induk Mahasiswa (filter spesifik)",
+     *         @OA\Schema(type="integer", example=24001123)
      *     ),
      *     @OA\Parameter(
      *         name="register_number",
      *         in="query",
      *         required=false,
-     *         description="Filter by Register Number",
-     *         @OA\Schema(type="integer")
+     *         description="Nomor registrasi (filter spesifik)",
+     *         @OA\Schema(type="integer", example=102030)
      *     ),
      *     @OA\Parameter(
-     *         name="department",
+     *         name="department_id",
      *         in="query",
      *         required=false,
-     *         description="Filter by Department Id",
-     *         @OA\Schema(type="integer")
+     *         description="ID jurusan (filter spesifik)",
+     *         @OA\Schema(type="integer", example=12)
      *     ),
      *     @OA\Parameter(
      *         name="entry_year",
      *         in="query",
      *         required=false,
-     *         description="Filter by Entry Year Id",
-     *         @OA\Schema(type="integer")
+     *         description="Tahun masuk mahasiswa",
+     *         @OA\Schema(type="integer", example=2023)
      *     ),
+     *     @OA\Parameter(
+     *         name="detail",
+     *         in="query",
+     *         required=false,
+     *         description="Tampilkan data detail mahasiswa (true/false)",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="server_paging",
+     *         in="query",
+     *         required=false,
+     *         description="Aktifkan server-side pagination (true/false)",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Jumlah data per halaman (jika server_paging=true)",
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
-     *         description="Student list retrieved successfully",
+     *         description="Data mahasiswa berhasil diambil",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="code", type="integer", example=200),
-     *             @OA\Property(property="message", type="string", example="Student list retrieved successfully"),
-     *             @OA\Property(property="data", type="array",
+     *             @OA\Property(property="message", type="string", example="Student fetched successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
      *                 @OA\Items(
-     *                     @OA\Property(property="Student_Id", type="integer", example=1),
-     *                     @OA\Property(property="Nim", type="string", example="20220500075"),
-     *                     @OA\Property(property="Register_Number", type="string", example="123456"),
-     *                     @OA\Property(property="Full_Name", type="string", example="Budi Santoso"),
-     *                     @OA\Property(property="Department", type="string", example="Teknik Informatika"),
-     *                     @OA\Property(property="Class_Program", type="string", example="Reguler"),
-     *                     @OA\Property(property="Religion", type="string", example="Islam"),
-     *                     @OA\Property(property="Marital_Status", type="string", example="Single"),
-     *                     @OA\Property(property="Birth_Place", type="string", example="Palembang"),
-     *                     @OA\Property(property="Birth_Date", type="string", format="date", example="2002-05-20"),
-     *                     @OA\Property(property="Entry_Year", type="integer", example=2022),
-     *                     @OA\Property(property="Entry_Term_Id", type="integer", example=1),
-     *                     @OA\Property(property="Nisn", type="string", example="1234567890"),
-     *                     @OA\Property(property="Nik", type="string", example="167xxxxxxxxxxx"),
-     *                     @OA\Property(property="Email_Corporate", type="string", example="budi@sibermu.ac.id"),
-     *                     @OA\Property(property="Phone_Mobile", type="string", example="081234567890")
+     *                     oneOf={
+     *                         @OA\Schema(
+     *                             title="Versi Ringkas",
+     *                             @OA\Property(property="Student_Id", type="integer", example=1),
+     *                             @OA\Property(property="Nim", type="string", example="24001123"),
+     *                             @OA\Property(property="Full_Name", type="string", example="Ahmad Setiawan"),
+     *                             @OA\Property(property="Department", type="string", example="Teknik Informatika"),
+     *                             @OA\Property(property="Class_Program", type="string", example="Reguler"),
+     *                             @OA\Property(property="Religion", type="string", example="Islam"),
+     *                             @OA\Property(property="Gender_Type", type="string", example="Laki-laki"),
+     *                             @OA\Property(property="Birth_Place", type="string", example="Bandung"),
+     *                             @OA\Property(property="Birth_Date", type="string", format="date", example="2004-02-01")
+     *                         ),
+     *                         @OA\Schema(
+     *                             title="Versi Detail",
+     *                             @OA\Property(property="Student_Id", type="integer", example=1),
+     *                             @OA\Property(property="NIM", type="string", example="24001123"),
+     *                             @OA\Property(property="Nama", type="string", example="Ahmad Setiawan"),
+     *                             @OA\Property(property="Tempat_Lahir", type="string", example="Bandung"),
+     *                             @OA\Property(property="Tanggal_Lahir", type="string", example="1 Februari 2004"),
+     *                             @OA\Property(property="Jenis_Kelamin", type="string", example="Laki-laki"),
+     *                             @OA\Property(property="NIK", type="string", example="3201234567890001"),
+     *                             @OA\Property(property="Agama", type="string", example="Islam"),
+     *                             @OA\Property(property="NISN", type="string", example="9999999999"),
+     *                             @OA\Property(property="Jalur_Pendaftaran", type="string", example="SNBP"),
+     *                             @OA\Property(property="NPWP", type="string", example="-"),
+     *                             @OA\Property(property="Kewarganegaraan", type="string", example="Indonesia"),
+     *                             @OA\Property(property="Jenis_Pendaftaran", type="string", example="Baru"),
+     *                             @OA\Property(property="Tgl_Masuk_Kuliah", type="string", example="10 Agustus 2023"),
+     *                             @OA\Property(property="Alamat", type="string", example="Jl. Soekarno-Hatta No. 10"),
+     *                             @OA\Property(property="Kelurahan", type="string", example="Sukapura"),
+     *                             @OA\Property(property="Kecamatan", type="string", example="Cibiru"),
+     *                             @OA\Property(property="Kode_Pos", type="string", example="40293"),
+     *                             @OA\Property(property="Transportasi", type="string", example="Motor"),
+     *                             @OA\Property(property="No_HP", type="string", example="08123456789"),
+     *                             @OA\Property(property="Email", type="string", example="ahmad@student.univ.ac.id"),
+     *                             @OA\Property(property="Terima_KPS", type="string", example="Tidak"),
+     *                             @OA\Property(property="No_KPS", type="string", example="-"),
+     *                             @OA\Property(property="Ayah_Name", type="string", example="Budi Setiawan"),
+     *                             @OA\Property(property="Ayah_Education_Type_Name", type="string", example="S1"),
+     *                             @OA\Property(property="Ayah_Job_Category_Name", type="string", example="Wiraswasta"),
+     *                             @OA\Property(property="Ayah_Income", type="number", example=7000000),
+     *                             @OA\Property(property="Ibu_Name", type="string", example="Siti Aminah"),
+     *                             @OA\Property(property="Ibu_Education_Type_Name", type="string", example="SMA"),
+     *                             @OA\Property(property="Ibu_Job_Category_Name", type="string", example="Ibu Rumah Tangga"),
+     *                             @OA\Property(property="Ibu_Income", type="number", example=0),
+     *                             @OA\Property(property="Wali_Name", type="string", example="-"),
+     *                             @OA\Property(property="Wali_Education_Type_Name", type="string", example="-"),
+     *                             @OA\Property(property="Wali_Job_Category_Name", type="string", example="-"),
+     *                             @OA\Property(property="Wali_Income", type="string", example="-"),
+     *                             @OA\Property(property="Jumlah_Biaya_Masuk", type="number", example=7500000),
+     *                             @OA\Property(property="Jenis_Pembiayaan", type="string", example="-"),
+     *                             @OA\Property(property="SKS_Diakui", type="string", example="-"),
+     *                             @OA\Property(property="Asal_Perguruan_Tinggi", type="string", example="-"),
+     *                             @OA\Property(property="Asal_Program_Studi", type="string", example="-")
+     *                         )
+     *                     }
      *                 )
      *             ),
-     *             @OA\Property(property="meta", type="object",
+     *             @OA\Property(
+     *                 property="pagination",
+     *                 type="object",
      *                 @OA\Property(property="current_page", type="integer", example=1),
      *                 @OA\Property(property="per_page", type="integer", example=20),
-     *                 @OA\Property(property="total", type="integer", example=1),
-     *                 @OA\Property(property="last_page", type="integer", example=1)
+     *                 @OA\Property(property="total", type="integer", example=120)
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validasi gagal",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=422),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="data", type="object",
+     *                 example={"nim": {"The nim must be an integer."}}
      *             )
      *         )
      *     ),
      *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized - Invalid or missing token",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="code", type="integer", example=401),
-     *             @OA\Property(property="message", type="string", example="Unauthorized"),
-     *             @OA\Property(property="data", type="string", example=null)
-     *         )
-     *     ),
-     *     @OA\Response(
      *         response=500,
-     *         description="Server error",
+     *         description="Terjadi kesalahan server internal",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="code", type="integer", example=500),
-     *             @OA\Property(property="message", type="string", example="Failed to retrieve student list"),
-     *             @OA\Property(property="error", type="string", example="SQLSTATE[42S22]: Column not found...")
+     *             @OA\Property(property="message", type="string", example="Internal server error")
      *         )
      *     )
      * )
      */
-
-    use ApiResponseTrait;
 
     public function studentData(Request $request)
     {
@@ -256,30 +333,43 @@ class StudentController extends Controller
                             'Student_Id' => $s->Student_Id,
                             'NIM' => $s->Nim,
                             'Nama' => $s->Full_Name,
-                            'Tempat Lahir' => $s->Birth_Place,
-                            'Tanggal Lahir' => $birth,
-                            'Jenis Kelamin' => $s->Gender_Type,
+                            'Tempat_Lahir' => $s->Birth_Place,
+                            'Tanggal_Lahir' => $birth,
+                            'Jenis_Kelamin' => $s->Gender_Type,
                             'NIK' => $s->Nik,
                             'Agama' => $s->Religion_Name,
                             'NISN' => $s->Nisn,
-                            'Jalur Pendaftaran' => $allCamaru[$s->Register_Number] ?? '',
+                            'Jalur_Pendaftaran' => $allCamaru[$s->Register_Number] ?? '',
                             'NPWP' => $s->Npwp,
                             'Kewarganegaraan' => $s->Citizenship_Name,
-                            'Jenis Pendaftaran' => $s->Register_Status_Name,
-                            'Tgl Masuk Kuliah' => $masukKuliah,
+                            'Jenis_Pendaftaran' => $s->Register_Status_Name,
+                            'Tgl_Masuk_Kuliah' => $masukKuliah,
                             'Alamat' => $s->Address,
                             'Kelurahan' => $s->Sub_District,
                             'Kecamatan' => $s->District_Name,
                             'Kode Pos' => $s->Zip_Code,
                             'Transportasi' => $s->Transport_Type,
-                            'No HP' => $s->Phone_Mobile,
+                            'No_HP' => $s->Phone_Mobile,
                             'Email' => $s->Email_Corporate,
-                            'Terima KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
-                            'No KPS' => $s->Kps_Number,
-                            'Nama Ayah' => $ayah?->Full_Name ?? '',
-                            'Nama Ibu' => $ibu?->Full_Name ?? '',
-                            'Nama Wali' => $wali?->Full_Name ?? '',
-                            'Jumlah Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
+                            'Terima_KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
+                            'No_KPS' => $s->Kps_Number,
+                            'Ayah_Name' => $ayah?->Full_Name ?? '',
+                            'Ayah_Education_Type_Name' => $ayah?->Education_Type_Name ?? '',
+                            'Ayah_Job_Category_Name' => $ayah?->Job_Category_Name ?? '',
+                            'Ayah_Income' => $ayah?->Income ?? '',
+                            'Ibu_Name' => $ibu?->Full_Name ?? '',
+                            'Ibu_Education_Type_Name' => $ibu?->Education_Type_Name ?? '',
+                            'Ibu_Job_Category_Name' => $ibu?->Job_Category_Name ?? '',
+                            'Ibu_Income' => $ibu?->Income ?? '',
+                            'Wali_Name' => $wali?->Full_Name ?? '',
+                            'Wali_Education_Type_Name' => $wali?->Education_Type_Name ?? '',
+                            'Wali_Job_Category_Name' => $wali?->Job_Category_Name ?? '',
+                            'Wali_Income' => $wali?->Income ?? '',
+                            'Jumlah_Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
+                            'Jenis Pembiayaan' => '',
+                            'SKS Diakui' => '',
+                            'Asal Perguruan Tinggi' => '',
+                            'Asal Program Studi' => '',
                         ];
                     } else {
                         return (array) $s;
@@ -328,10 +418,23 @@ class StudentController extends Controller
                             'Email' => $s->Email_Corporate,
                             'Terima KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
                             'No KPS' => $s->Kps_Number,
-                            'Nama Ayah' => $ayah?->Full_Name ?? '',
-                            'Nama Ibu' => $ibu?->Full_Name ?? '',
-                            'Nama Wali' => $wali?->Full_Name ?? '',
+                            'Ayah_Name' => $ayah?->Full_Name ?? '',
+                            'Ayah_Education_Type_Name' => $ayah?->Education_Type_Name ?? '',
+                            'Ayah_Job_Category_Name' => $ayah?->Job_Category_Name ?? '',
+                            'Ayah_Income' => $ayah?->Income ?? '',
+                            'Ibu_Name' => $ibu?->Full_Name ?? '',
+                            'Ibu_Education_Type_Name' => $ibu?->Education_Type_Name ?? '',
+                            'Ibu_Job_Category_Name' => $ibu?->Job_Category_Name ?? '',
+                            'Ibu_Income' => $ibu?->Income ?? '',
+                            'Wali_Name' => $wali?->Full_Name ?? '',
+                            'Wali_Education_Type_Name' => $wali?->Education_Type_Name ?? '',
+                            'Wali_Job_Category_Name' => $wali?->Job_Category_Name ?? '',
+                            'Wali_Income' => $wali?->Income ?? '',
                             'Jumlah Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
+                            'Jenis Pembiayaan' => '',
+                            'SKS Diakui' => '',
+                            'Asal Perguruan Tinggi' => '',
+                            'Asal Program Studi' => '',
                         ];
                     } else {
                         $students[] = (array) $s;

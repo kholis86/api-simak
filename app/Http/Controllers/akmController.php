@@ -9,6 +9,112 @@ use Illuminate\Support\Facades\DB;
 class akmController extends Controller
 {
     use ApiResponseTrait;
+
+    /**
+     * @OA\Get(
+     *     path="/api/akm",
+     *     summary="Get Academic Performance (AKM) data of students",
+     *     tags={"Academic"},
+     *     description="Menampilkan data AKM (Aktivitas Kuliah Mahasiswa) per mahasiswa berdasarkan filter department, tahun masuk, dan pagination opsional.",
+     *     security={{"bearerAuth":{}}},
+     *
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="query",
+     *         required=false,
+     *         description="ID Mahasiswa (opsional, bisa untuk 1 mahasiswa)",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="nim",
+     *         in="query",
+     *         required=false,
+     *         description="Nomor Induk Mahasiswa (opsional)",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter berdasarkan ID departemen",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="entry_year",
+     *         in="query",
+     *         required=false,
+     *         description="Tahun masuk mahasiswa (Entry_Year_Id)",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="server_paging",
+     *         in="query",
+     *         required=false,
+     *         description="Aktifkan pagination server-side (true/false)",
+     *         @OA\Schema(type="boolean")
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Jumlah data per halaman jika server_paging = true",
+     *         @OA\Schema(type="integer", default=20)
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="AKM fetched successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="AKM fetched successfully"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="nama", type="string", example="Budi Santoso"),
+     *                     @OA\Property(property="nim", type="string", example="22011001"),
+     *                     @OA\Property(
+     *                         property="akm",
+     *                         type="array",
+     *                         @OA\Items(
+     *                             @OA\Property(property="term_year_id", type="integer", example=20241),
+     *                             @OA\Property(property="sks", type="integer", example=20),
+     *                             @OA\Property(property="sks_kumulatif", type="integer", example=120),
+     *                             @OA\Property(property="bnk_total", type="number", format="float", example=65.5),
+     *                             @OA\Property(property="ipk", type="number", format="float", example=3.25),
+     *                             @OA\Property(property="ipk_kumulatif", type="number", format="float", example=3.22)
+     *                         )
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=422),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Internal server error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="code", type="integer", example=500),
+     *             @OA\Property(property="message", type="string", example="Something went wrong"),
+     *             @OA\Property(property="data", type="string", example="SQLSTATE[42S22]: Column not found: 1054 Unknown column...")
+     *         )
+     *     )
+     * )
+     */
+
     public function akmData(Request $request)
     {
         try {

@@ -13,96 +13,140 @@ class KhsController extends Controller
     /**
      * @OA\Get(
      *     path="/api/student-khs",
-     *     tags={"KHS"},
-     *     summary="Get student KHS",
-     *     description="Ambil data KHS mahasiswa berdasarkan Student_Id (wajib) dan Term_Year_Id (opsional)",
+     *     summary="Get Student KHS Data",
+     *     description="Mengambil data KHS (Kartu Hasil Studi) mahasiswa berdasarkan filter student_id, term_year_id, dan department_id.",
+     *     operationId="studentKhs",
      *     security={{"bearerAuth":{}}},
+     *     tags={"Academic"},
+     *
      *     @OA\Parameter(
-     *         name="Student_Id",
-     *         in="query",
-     *         required=true,
-     *         description="ID mahasiswa",
-     *         @OA\Schema(type="integer", example=12345)
-     *     ),
-     *     @OA\Parameter(
-     *         name="Term_Year_Id",
+     *         name="student_id",
      *         in="query",
      *         required=false,
-     *         description="ID tahun akademik (opsional)",
+     *         description="Bisa single ID, array, atau daftar ID dipisahkan koma (contoh: 1001,1002,1003)",
+     *         @OA\Schema(type="string", example="1001,1002")
+     *     ),
+     *     @OA\Parameter(
+     *         name="term_year_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter berdasarkan tahun ajaran",
      *         @OA\Schema(type="integer", example=20241)
      *     ),
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter berdasarkan department",
+     *         @OA\Schema(type="integer", example=5)
+     *     ),
+     *     @OA\Parameter(
+     *         name="server_paging",
+     *         in="query",
+     *         required=false,
+     *         description="Aktifkan pagination server-side (true/false)",
+     *         @OA\Schema(type="boolean", example=true)
+     *     ),
+     *     @OA\Parameter(
+     *         name="per_page",
+     *         in="query",
+     *         required=false,
+     *         description="Jumlah data per halaman (hanya jika server_paging=true)",
+     *         @OA\Schema(type="integer", example=20)
+     *     ),
+     *
      *     @OA\Response(
      *         response=200,
-     *         description="Student KHS retrieved successfully",
+     *         description="KHS fetched successfully",
      *         @OA\JsonContent(
-     *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="code", type="integer", example=200),
-     *             @OA\Property(property="message", type="string", example="Student KHS retrieved successfully"),
+     *             @OA\Property(property="message", type="string", example="KHS fetched successfully"),
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
-     *                 @OA\Property(property="Student_Id", type="integer", example=12345),
-     *                 @OA\Property(property="Full_Name", type="string", example="Ahmad Budi"),
-     *                 @OA\Property(property="Nim", type="string", example="210101001"),
-     *                 @OA\Property(
-     *                     property="Khs",
-     *                     type="array",
-     *                     @OA\Items(
-     *                         type="object",
-     *                         @OA\Property(property="Krs_Id", type="integer", example=1001),
-     *                         @OA\Property(property="Course_Id", type="integer", example=2001),
-     *                         @OA\Property(property="Course_Code", type="string", example="IF101"),
-     *                         @OA\Property(property="Course_Name", type="string", example="Algoritma & Pemrograman"),
-     *                         @OA\Property(property="Sks", type="integer", example=3),
-     *                         @OA\Property(property="Grade_Letter_Id", type="string", example="A"),
-     *                         @OA\Property(property="Weight_Value", type="number", format="float", example=4.00),
-     *                         @OA\Property(property="Bnk_Value", type="number", format="float", example=12.00)
-     *                     )
-     *                 )
-     *             ),
-     *             @OA\Property(
-     *                 property="meta",
-     *                 type="object",
-     *                 @OA\Property(property="total", type="integer", example=5)
+     *                 example={
+     *                     "current_page": 1,
+     *                     "per_page": 20,
+     *                     "total": 2,
+     *                     "data": {
+     *                         {
+     *                             "Student_Id": 1001,
+     *                             "Full_Name": "Budi Santoso",
+     *                             "Nim": "21010001",
+     *                             "Department_Id": 5,
+     *                             "Total_Khs": 3,
+     *                             "Khs": {
+     *                                 {
+     *                                     "Krs_Id": 1,
+     *                                     "Term_Year_Id": 20241,
+     *                                     "Course_Id": 201,
+     *                                     "Course_Code": "IF201",
+     *                                     "Course_Name": "Algoritma dan Pemrograman",
+     *                                     "Sks": 3,
+     *                                     "Class_Prog_Id": 2,
+     *                                     "Class_Program_Name": "Reguler Pagi",
+     *                                     "Class_Id": 1,
+     *                                     "Class_Name": "A",
+     *                                     "Grade_Letter": "A",
+     *                                     "Weight_Value": 4.00,
+     *                                     "Bnk_Value": 90
+     *                                 },
+     *                                 {
+     *                                     "Krs_Id": 2,
+     *                                     "Term_Year_Id": 20241,
+     *                                     "Course_Id": 205,
+     *                                     "Course_Code": "IF205",
+     *                                     "Course_Name": "Basis Data",
+     *                                     "Sks": 3,
+     *                                     "Class_Prog_Id": 2,
+     *                                     "Class_Program_Name": "Reguler Pagi",
+     *                                     "Class_Id": 2,
+     *                                     "Class_Name": "B",
+     *                                     "Grade_Letter": "B+",
+     *                                     "Weight_Value": 3.5,
+     *                                     "Bnk_Value": 85
+     *                                 }
+     *                             }
+     *                         }
+     *                     }
+     *                 }
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
-     *         description="Student not found",
+     *         description="No students found",
      *         @OA\JsonContent(
-     *             type="object",
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="code", type="integer", example=404),
-     *             @OA\Property(property="message", type="string", example="Student not found"),
-     *             @OA\Property(property="data", type="array", @OA\Items())
+     *             @OA\Property(property="message", type="string", example="No students found")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation failed",
      *         @OA\JsonContent(
-     *             type="object",
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="code", type="integer", example=422),
      *             @OA\Property(property="message", type="string", example="Validation failed"),
-     *             @OA\Property(property="errors", type="object",
-     *                 example={"Student_Id": {"The Student_Id field is required."}}
-     *             ),
-     *             @OA\Property(property="data", type="array", @OA\Items())
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 example={"term_year_id": {"The term_year_id field must be an integer."}}
+     *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=500,
      *         description="Internal server error",
      *         @OA\JsonContent(
-     *             type="object",
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="code", type="integer", example=500),
-     *             @OA\Property(property="message", type="string", example="Internal server error"),
-     *             @OA\Property(property="error", type="string", example="SQLSTATE[42S22]: Column not found"),
-     *             @OA\Property(property="data", type="array", @OA\Items())
+     *             @OA\Property(property="message", type="string", example="Internal server error")
      *         )
      *     )
      * )
