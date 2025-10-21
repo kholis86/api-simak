@@ -206,7 +206,8 @@ class KhsController extends Controller
                     'cl.Class_Name',
                     'gl.Grade_Letter',
                     'khs.Weight_Value',
-                    'khs.Bnk_Value'
+                    'khs.Bnk_Value',
+                    'Grade_Number',
                 )
                 ->join('acd_grade_letter as gl', 'khs.Grade_Letter_Id', '=', 'gl.Grade_Letter_Id')
                 ->join('acd_student_krs as krs', 'khs.Krs_Id', '=', 'krs.Krs_Id')
@@ -241,6 +242,7 @@ class KhsController extends Controller
                     'Grade_Letter'      => $row->Grade_Letter,
                     'Weight_Value'      => $row->Weight_Value,
                     'Bnk_Value'         => $row->Bnk_Value,
+                    'Grade_Number'       => $row->Grade_Number,
                 ];
             }
 
