@@ -17,6 +17,11 @@ trait ApiResponseTrait
      */
     public function errorResponse(string $message, $error, int $code = 500): JsonResponse
     {
+        // Sembunyikan detail error di production
+        if (app()->environment('production') && $code >= 500) {
+            $error = 'Internal Server Error';
+        }
+
         return response()->json([
             'success' => false,
             'code'    => $code,

@@ -14,9 +14,9 @@ use App\Http\Controllers\SocialAuthController;
 Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToProvider']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleProviderCallback']);
 
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-Route::post('/token/login', [ApiAuthController::class, 'login']);
+Route::post('/token/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
 // Route::post('/token/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
 
 // amankan pakai token

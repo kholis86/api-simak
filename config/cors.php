@@ -15,7 +15,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'], // bisa spesifik: ['http://localhost:5173', 'https://yourdomain.com']
+    'allowed_origins' => [env('FRONTEND_URL', '*')], // bisa spesifik: ['http://localhost:5173', 'https://yourdomain.com']
 
     'allowed_origins_patterns' => [],
 
