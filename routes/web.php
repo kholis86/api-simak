@@ -8,3 +8,9 @@ Route::get('/', function () {
     // dd($hash);
     return view('welcome');
 });
+
+Route::get('/hash', function () {
+    $var = md5('password');
+    $hash = Hash::make('password');
+    dd('md5=' . $var . ' hash=' . $hash);
+});

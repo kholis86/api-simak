@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcdStudent;
 use App\Models\ApiUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -56,18 +57,32 @@ class ApiAuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = ApiUser::where('username', $request->username)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'success' => false,
-                'code'    => 401,
-                'message' => 'Invalid Token credentials',
-                'data'    => null
-            ], 401);
+        if ($request->has('type') && $request->type == 'acd_student') {
+            $user = AcdStudent::where('Nim', $request->username)->first();
+            if (! $user || md5($request->password) !== $user->Student_Password) {
+                return response()->json([
+                    'success' => false,
+                    'code'    => 401,
+                    'message' => 'Invalid Token credentials',
+                    'data'    => null
+                ], 401);
+            } else {
+                $tokenResult = $user->createToken('mahasiswa-token');
+            }
+        } else {
+            $user = ApiUser::where('username', $request->username)->first();
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'code'    => 401,
+                    'message' => 'Invalid Token credentials',
+                    'data'    => null
+                ], 401);
+            } else {
+                $tokenResult = $user->createToken('api-token');
+            }
         }
 
-        $tokenResult = $user->createToken('api-token');
         $token = $tokenResult->plainTextToken;
 
         // Set expired_at 24 jam
@@ -101,6 +116,9 @@ class ApiAuthController extends Controller
 
     public function profile(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+        // Pilih hanya kolom Student_Id, Full_Name, dan Nim
+        $profileData = $user->only(['Student_Id', 'Register_Number', 'Full_Name', 'Nim', 'Department_Id']);
+        return response()->json($profileData);
     }
 }

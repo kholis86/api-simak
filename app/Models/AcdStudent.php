@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
-class AcdStudent extends Model
+class AcdStudent extends Authenticatable
 {
+    use HasApiTokens;
     protected $table = 'acd_student';
     protected $primaryKey = 'Student_Id';
 
@@ -26,7 +29,8 @@ class AcdStudent extends Model
         'Nisn',
         'Nik',
         'Email_Corporate',
-        'Phone_Mobile'
+        'Phone_Mobile',
+        'Student_Password'
     ];
 
     // Relasi ke Department

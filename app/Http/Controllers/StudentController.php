@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\ApiResponseTrait;
 use App\Helpers\TanggalIndo;
+use App\Helpers\CheckJenisToken;
 
 class StudentController extends Controller
 {
@@ -195,13 +196,20 @@ class StudentController extends Controller
             $perPage = (int) $request->get('per_page', 20);
             $detail = $request->boolean('detail', false);
 
+            $tokenName = CheckJenisToken::getName($request);
+            $dataBearer = $request->user();
             $students = [];
 
             $query = DB::table('acd_student as s')
+                ->leftJoin('reg_camaru as ca', 's.Register_Number', '=', 'ca.Reg_Num')
                 ->leftJoin('mstr_department as d', 's.Department_Id', '=', 'd.Department_Id')
                 ->leftJoin('mstr_class_program as cp', 's.Class_Prog_Id', '=', 'cp.Class_Prog_Id')
                 ->leftJoin('mstr_gender as g', 's.Gender_Id', '=', 'g.Gender_Id')
                 ->leftJoin('mstr_religion as r', 's.Religion_Id', '=', 'r.Religion_Id');
+
+            if ($tokenName == 'mahasiswa-token') {
+                $query->where('Student_Id', $dataBearer->Student_Id);
+            }
 
             // === SELECT KONDISIONAL BERDASARKAN DETAIL ===
             if ($detail) {
@@ -225,8 +233,19 @@ class StudentController extends Controller
                         's.Email_Corporate',
                         's.Birth_Place',
                         's.Birth_Date',
-                        's.Recieve_Kps',
+                        DB::raw("
+                            CASE 
+                                WHEN s.Recieve_Kps = 1 THEN 'Ya'
+                                ELSE 'Tidak'
+                            END as Recieve_Kps
+                        "),
                         's.Kps_Number',
+                        DB::raw("
+                            CASE 
+                                WHEN ca.Register_Type_Id = 27 THEN 'Ya'
+                                ELSE 'Tidak'
+                            END as Kip
+                        "),
                         'd.Department_Name',
                         'cp.Class_Program_Name',
                         'g.Gender_Type',
@@ -251,6 +270,19 @@ class StudentController extends Controller
                     'd.Department_Name as Department',
                     'cp.Class_Program_Name as Class_Program',
                     'r.Religion_Name as Religion',
+                    DB::raw("
+                        CASE 
+                            WHEN s.Recieve_Kps = 1 THEN 'Ya'
+                            ELSE 'Tidak'
+                        END as Recieve_Kps
+                    "),
+                    's.Kps_Number',
+                    DB::raw("
+                        CASE 
+                            WHEN ca.Register_Type_Id = 27 THEN 'Ya'
+                            ELSE 'Tidak'
+                        END as Kip
+                    "),
                     's.Birth_Place',
                     's.Birth_Date',
                     's.Entry_Year_Id',
@@ -269,6 +301,17 @@ class StudentController extends Controller
             if ($request->filled('register_number')) $query->where('s.Register_Number', $request->register_number);
             if ($request->filled('department_id')) $query->where('s.Department_Id', $request->department_id);
             if ($request->filled('entry_year')) $query->where('s.Entry_Year_Id', $request->entry_year);
+            if ($request->filled('kip')) {
+                $isKip = filter_var($request->kip, FILTER_VALIDATE_BOOLEAN);
+                if ($isKip) {
+                    $query->where('ca.Register_Type_Id', 27);
+                } else {
+                    $query->where(function ($q) {
+                        $q->where('ca.Register_Type_Id', '!=', 27)
+                            ->orWhereNull('ca.Register_Type_Id');
+                    });
+                }
+            }
 
             $query->orderBy('s.Nim');
 
@@ -353,6 +396,7 @@ class StudentController extends Controller
                             'Email' => $s->Email_Corporate,
                             'Terima_KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
                             'No_KPS' => $s->Kps_Number,
+                            'Kip' => $s->Kip,
                             'Ayah_Name' => $ayah?->Full_Name ?? '',
                             'Ayah_Education_Type_Name' => $ayah?->Education_Type_Name ?? '',
                             'Ayah_Job_Category_Name' => $ayah?->Job_Category_Name ?? '',
@@ -418,6 +462,7 @@ class StudentController extends Controller
                             'Email' => $s->Email_Corporate,
                             'Terima KPS' => $s->Recieve_Kps ? 'Ya' : 'Tidak',
                             'No KPS' => $s->Kps_Number,
+                            'Kip' => $s->Kip,
                             'Ayah_Name' => $ayah?->Full_Name ?? '',
                             'Ayah_Education_Type_Name' => $ayah?->Education_Type_Name ?? '',
                             'Ayah_Job_Category_Name' => $ayah?->Job_Category_Name ?? '',

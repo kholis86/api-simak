@@ -9,10 +9,15 @@ use App\Http\Controllers\ApiAuthController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KrsController;
 use App\Http\Controllers\OfferedCourseController;
+use App\Http\Controllers\SocialAuthController;
+
+Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToProvider']);
+Route::get('auth/google/callback', [SocialAuthController::class, 'handleProviderCallback']);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 
-Route::post('/token/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/token/login', [ApiAuthController::class, 'login']);
+// Route::post('/token/login', [ApiAuthController::class, 'login'])->middleware('throttle:5,1');
 
 // amankan pakai token
 Route::middleware(['api_token', 'gzip'])->group(function () {
@@ -24,11 +29,18 @@ Route::middleware(['api_token', 'gzip'])->group(function () {
     Route::get('/student-krs', [KrsController::class, 'studentKrs']);
     Route::get('/student-khs', [KhsController::class, 'studentKhs']);
 
+    //post
+    Route::post('/post-krs', [KrsController::class, 'postKrs']);
+
+    //Delete
+    Route::delete('/delete-krs', [KrsController::class, 'deleteKrs']);
+
     //Offered Course
     Route::get('/offered-course', [OfferedCourseController::class, 'offeredCourseData']);
 
     //AKM
     Route::get('/akm', [akmController::class, 'akmData']);
+    Route::get('/akmBySemester', [akmController::class, 'akmBySemesterData']);
 
     //master
     Route::prefix('master')->group(function () {
@@ -36,5 +48,6 @@ Route::middleware(['api_token', 'gzip'])->group(function () {
         Route::get('program-classes', [MasterController::class, 'classPrograms']);
         Route::get('religions', [MasterController::class, 'religions']);
         Route::get('marital-statuses', [MasterController::class, 'maritalStatuses']);
+        Route::get('term-year', [MasterController::class, 'termYear']);
     });
 });

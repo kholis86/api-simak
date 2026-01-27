@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CheckJenisToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\ApiResponseTrait;
@@ -161,6 +162,9 @@ class KhsController extends Controller
                 'department_id'  => 'nullable|integer',
             ]);
 
+            $tokenName = CheckJenisToken::getName($request);
+            $dataBearer = $request->user();
+
             // $studentIds = $request->student_id
             //     ? (is_array($request->student_id) ? $request->student_id : [$request->student_id])
             //     : [];
@@ -174,8 +178,11 @@ class KhsController extends Controller
             $serverPaging = filter_var($request->server_paging, FILTER_VALIDATE_BOOLEAN);
 
             // Ambil mahasiswa (bisa semua, bisa beberapa)
-            $studentsQuery = DB::table('acd_student')
-                ->select('Student_Id', 'Full_Name', 'Nim', 'Department_Id')
+            $studentsQuery = DB::table('acd_student');
+            if ($tokenName == 'mahasiswa-token') {
+                $studentsQuery->where('Student_Id', $dataBearer->Student_Id);
+            }
+            $studentsQuery->select('Student_Id', 'Full_Name', 'Nim', 'Department_Id')
                 ->when(!empty($studentIds), fn($q) => $q->whereIn('Student_Id', $studentIds))
                 ->when($departmentId, fn($q) => $q->where('Department_Id', $departmentId))
                 ->orderBy('Student_Id');
