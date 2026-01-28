@@ -150,7 +150,15 @@ class OfferedCourseController extends Controller
                     DATE(ty.End_Date) as End_Date,
                     c.Course_Code,
                     c.Course_Name,
-                    cl.Class_Name
+                    (IFNULL(c.Sks_Tm, 0) + IFNULL(c.Sks_Prak, 0) + IFNULL(c.Sks_Prak_Lap, 0) + IFNULL(c.Sks_Sim, 0)) as Sks,
+                    cl.Class_Name,
+                    (oc.Class_Capacity - (
+                        SELECT count(student_id)
+                        FROM acd_student_krs
+                        WHERE Term_Year_Id = oc.Term_Year_Id
+                          AND Course_Id = oc.Course_Id
+                          AND Class_Id = oc.Class_Id
+                    )) as Capacity
                 ")
                 ->when($request->filled('department_id'), fn($q) => $q->where('oc.Department_Id', $departmentId))
                 ->when($request->filled('term_year_id'), fn($q) => $q->where('oc.Term_Year_Id', $termYearId))

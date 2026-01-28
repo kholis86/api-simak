@@ -1,0 +1,42 @@
+version: "3"
+rpc:
+  listen: "tcp://127.0.0.1:6001"
+server:
+  command: "php app.php"
+  relay: pipes
+http:
+  address: "0.0.0.0:8080"
+  middleware:
+    - gzip
+    - static
+  static:
+    dir: public
+    forbid:
+      - .php
+      - .htaccess
+  pool:
+    num_workers: 1
+status:
+  address: "127.0.0.1:2114"
+logs:
+  mode: development
+  level: debug
+reload:
+  interval: 1s
+  patterns: [".php"]
+  services:
+    http:
+      recursive: true
+      dirs: ["app", "routes", "config"]
+jobs:
+  pool:
+    num_workers: 2
+    max_worker_memory: 100
+  consume: {}
+kv:
+  local:
+    driver: memory
+    config:
+      interval: 60
+metrics:
+  address: "127.0.0.1:2112"

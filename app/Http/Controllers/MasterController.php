@@ -322,4 +322,152 @@ class MasterController extends Controller
             return $this->errorResponse('Something went wrong', $e->getMessage(), 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/master/term-active",
+     *     tags={"Master"},
+     *     summary="Get active term year",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Active Term year fetched successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Active Term Year fetched"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function termActive(Request $request)
+    {
+        try {
+            $tokenName = CheckJenisToken::getName($request);
+            $dataBearer = $request->user();
+
+            $departmentId = null;
+            if ($tokenName == 'mahasiswa-token' && $dataBearer) {
+                $departmentId = $dataBearer->Department_Id;
+            } elseif ($request->has('department_id')) {
+                $departmentId = $request->department_id;
+            }
+
+            $query = MstrTermYear::select('*')->whereRaw('NOW() BETWEEN Start_Date AND End_Date');
+
+            $term = $query->first();
+
+            if ($term) {
+                $term->Start_Krs_Date = null;
+                $term->End_Krs_Date = null;
+
+                if ($departmentId) {
+                    $krsSchedule = MstrEventSched::where('Term_Year_Id', $term->Term_Year_Id)
+                        ->where('Department_Id', $departmentId)
+                        ->where('Event_Id', 1)
+                        ->first();
+
+                    if ($krsSchedule) {
+                        $term->Start_Krs_Date = $krsSchedule->Start_Date;
+                        $term->End_Krs_Date = $krsSchedule->End_Date;
+                    }
+                }
+            }
+
+            return $this->successResponse('Active Term Year fetched', $term);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Something went wrong', $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/master/term-student",
+     *     tags={"Master"},
+     *     summary="Get student term history plus active term",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Student terms fetched successfully",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Student terms fetched"),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function termStudent(Request $request)
+    {
+        try {
+            $tokenName = CheckJenisToken::getName($request);
+            $dataBearer = $request->user();
+
+            $departmentId = null;
+            if ($tokenName == 'mahasiswa-token' && $dataBearer) {
+                $departmentId = $dataBearer->Department_Id;
+            } elseif ($request->has('department_id')) {
+                $departmentId = $request->department_id;
+            }
+
+            $query = MstrTermYear::select('*');
+
+            // Syarat: Term yang pernah diambil MAHASISWA ATAU Term yang sedang AKTIF
+            $query->where(function ($q) use ($tokenName, $dataBearer) {
+                // 1. Term yang sedang AKTIF
+                $q->whereRaw('NOW() BETWEEN Start_Date AND End_Date');
+
+                // 2. Term yang pernah diikuti (Hanya jika user adalah Mahasiswa)
+                if ($tokenName == 'mahasiswa-token' && $dataBearer) {
+                    $followedTermIds = AcdStudentKrs::where('Student_Id', $dataBearer->Student_Id)
+                        ->distinct('Term_Year_Id')
+                        ->pluck('Term_Year_Id');
+
+                    if ($followedTermIds->isNotEmpty()) {
+                        $q->orWhereIn('Term_Year_Id', $followedTermIds);
+                    }
+                }
+            });
+
+            $terms = $query
+                ->orderByRaw('CASE WHEN NOW() BETWEEN Start_Date AND End_Date THEN 1 ELSE 0 END DESC')
+                ->orderBy('Term_Year_Id', 'DESC')
+                ->get();
+
+            // Mapping jadwal KRS
+            $terms = $terms->map(function ($term) use ($departmentId) {
+                $term->Start_Krs_Date = null;
+                $term->End_Krs_Date = null;
+
+                if ($departmentId) {
+                    $krsSchedule = MstrEventSched::where('Term_Year_Id', $term->Term_Year_Id)
+                        ->where('Department_Id', $departmentId)
+                        ->where('Event_Id', 1)
+                        ->first();
+
+                    if ($krsSchedule) {
+                        $term->Start_Krs_Date = $krsSchedule->Start_Date;
+                        $term->End_Krs_Date = $krsSchedule->End_Date;
+                    }
+                }
+                return $term;
+            });
+
+            return $this->successResponse('Student terms fetched', $terms);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Something went wrong', $e->getMessage(), 500);
+        }
+    }
 }

@@ -259,7 +259,9 @@ class StudentController extends Controller
                         'addr.Dusun',
                         'addr.Sub_District',
                         'dist.District_Name',
-                        'addr.Zip_Code'
+                        'addr.Zip_Code',
+                        DB::raw("(SELECT SUM(max_sks) FROM (SELECT MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_student_krs GROUP BY Student_Id, Course_Id) as t WHERE t.Student_Id = s.Student_Id) as Total_Sks"),
+                        DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk")
                     );
             } else {
                 $query->select(
@@ -291,7 +293,9 @@ class StudentController extends Controller
                     's.Nik',
                     's.Email_Corporate',
                     's.Phone_Mobile',
-                    'g.Gender_Type'
+                    'g.Gender_Type',
+                    DB::raw("(SELECT SUM(max_sks) FROM (SELECT MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_student_krs GROUP BY Student_Id, Course_Id) as t WHERE t.Student_Id = s.Student_Id) as Total_Sks"),
+                    DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk")
                 );
             }
 
@@ -411,9 +415,10 @@ class StudentController extends Controller
                             'Wali_Income' => $wali?->Income ?? '',
                             'Jumlah_Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
                             'Jenis Pembiayaan' => '',
-                            'SKS Diakui' => '',
+                            'SKS Diakui' => $s->Total_Sks ?? 0,
                             'Asal Perguruan Tinggi' => '',
                             'Asal Program Studi' => '',
+                            'Ipk' => $s->Ipk ?? 0,
                         ];
                     } else {
                         return (array) $s;
@@ -477,7 +482,7 @@ class StudentController extends Controller
                             'Wali_Income' => $wali?->Income ?? '',
                             'Jumlah Biaya Masuk' => $allPayments[$s->Register_Number] ?? '',
                             'Jenis Pembiayaan' => '',
-                            'SKS Diakui' => '',
+                            'SKS Diakui' => $s->Total_Sks,
                             'Asal Perguruan Tinggi' => '',
                             'Asal Program Studi' => '',
                         ];

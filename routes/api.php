@@ -49,5 +49,7 @@ Route::middleware(['api_token', 'gzip'])->group(function () {
         Route::get('religions', [MasterController::class, 'religions']);
         Route::get('marital-statuses', [MasterController::class, 'maritalStatuses']);
         Route::get('term-year', [MasterController::class, 'termYear']);
+        Route::get('term-active', [MasterController::class, 'termActive']);
+        Route::get('term-student', [MasterController::class, 'termStudent']);
     });
 });
