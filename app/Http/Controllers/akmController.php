@@ -218,6 +218,39 @@ class akmController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/akmBySemester",
+     *     tags={"Academic"},
+     *     summary="Get AKM by Semester",
+     *     description="Ambil data AKM yang dikelompokkan per semester.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="student_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="term_year_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="checkpoint",
+     *         in="query",
+     *         required=true,
+     *         description="Gunakan 1 atau 2 untuk versi query berbeda",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(type="object")
+     *     )
+     * )
+     */
     public function akmBySemesterData(Request $request)
     {
         if ($request->checkpoint == 1) {

@@ -114,6 +114,135 @@
                 }
             }
         },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "API Auth"
+                ],
+                "summary": "Logout API",
+                "description": "Hapus token akses API yang sedang aktif.",
+                "operationId": "df15ebaca40e163ffb90417c54b30ca2",
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "API Auth"
+                ],
+                "summary": "Get Token Profile",
+                "description": "Ambil data profil berdasarkan token.",
+                "operationId": "0ddbd711993b0f4edcd94ac8f7520607",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login Mahasiswa",
+                "description": "Endpoint login untuk mahasiswa menggunakan NIM dan Password MD5.",
+                "operationId": "8dcb70df1020986038d098cc08d05dae",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "username",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "username": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
         "/api/student-khs": {
             "get": {
                 "tags": [
@@ -552,6 +681,142 @@
                 ]
             }
         },
+        "/api/post-krs": {
+            "post": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Submit KRS",
+                "description": "Input Kartu Rencana Studi (KRS) untuk mahasiswa.",
+                "operationId": "d5f14e0810996b2cded6cb94b40c2b77",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "term_year_id",
+                                    "offered_course_ids"
+                                ],
+                                "properties": {
+                                    "term_year_id": {
+                                        "type": "integer",
+                                        "example": 20241
+                                    },
+                                    "offered_course_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 150
+                                        }
+                                    },
+                                    "student_id": {
+                                        "description": "Wajib jika menggunakan api-token",
+                                        "type": "integer",
+                                        "example": 1001
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "KRS successfully submitted",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KRS successfully submitted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed or Period closed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/delete-krs": {
+            "delete": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Delete KRS",
+                "description": "Hapus satu item KRS mahasiswa.",
+                "operationId": "7f4871897961ba2ed6fec8bc7618793a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "krs_id"
+                                ],
+                                "properties": {
+                                    "krs_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "student_id": {
+                                        "description": "Wajib jika menggunakan api-token",
+                                        "type": "integer",
+                                        "example": 1001
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "KRS deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "KRS deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "KRS not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/master/departments": {
             "get": {
                 "tags": [
@@ -888,6 +1153,135 @@
                 ]
             }
         },
+        "/api/master/term-year": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get all term years",
+                "description": "Ambil daftar tahun ajaran, filter otomatis jika user mahasiswa.",
+                "operationId": "9c20a9ef162077eb0d5a0c32ffd81833",
+                "parameters": [
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master/term-active": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get active term year",
+                "operationId": "55379bb58c5bb56bb3398fb7cadd85c0",
+                "responses": {
+                    "200": {
+                        "description": "Active Term year fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Active Term Year fetched"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master/term-student": {
+            "get": {
+                "tags": [
+                    "Master"
+                ],
+                "summary": "Get student term history plus active term",
+                "operationId": "aee119f6b4bb37e358cd3cffb66a793e",
+                "responses": {
+                    "200": {
+                        "description": "Student terms fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Student terms fetched"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/offered-course": {
             "get": {
                 "tags": [
@@ -1112,6 +1506,36 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/auth/google/redirect": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Redirect to Google",
+                "description": "Redirect user ke halaman login Google.",
+                "operationId": "72e3b68ac73ec308a047ed8ad5ccc171",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to Google"
+                    }
+                }
+            }
+        },
+        "/api/auth/google/callback": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Google Callback",
+                "description": "Hapus callback dari Google setelah login sukses.",
+                "operationId": "917a649ee0f66fe1cbc3b1a3178ba9bd",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to Frontend with token"
+                    }
+                }
             }
         },
         "/api/students": {
@@ -1729,6 +2153,61 @@
                     }
                 ]
             }
+        },
+        "/api/akmBySemester": {
+            "get": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Get AKM by Semester",
+                "description": "Ambil data AKM yang dikelompokkan per semester.",
+                "operationId": "b58ee31bffebe92d325b28da83955fd3",
+                "parameters": [
+                    {
+                        "name": "student_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "term_year_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "checkpoint",
+                        "in": "query",
+                        "description": "Gunakan 1 atau 2 untuk versi query berbeda",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1744,6 +2223,10 @@
         {
             "name": "API Auth",
             "description": "API Auth"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
         },
         {
             "name": "Academic",

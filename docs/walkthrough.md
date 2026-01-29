@@ -28,6 +28,9 @@ Saya telah berhasil mengimplementasikan **Laravel Octane** dengan server **RoadR
 
 - **Total SKS Calculation:** Menambahkan field `Total_Sks` yang menjumlahkan SKS dari mata kuliah unik (mengatasi course_id ganda) untuk tiap mahasiswa. Value ini juga dipetakan ke field `SKS Diakui` pada versi detail.
 - **IPK Calculation:** Menambahkan field `Ipk` dengan rumus `SUM(Bnk_Value) / NULLIF(SUM(Sks), 0)` dari tabel `acd_transcript`. Query menggunakan subquery untuk mengambil nilai terbaik (`MAX(Bnk_Value)` & `MAX(Sks)`) jika ada mata kuliah yang diulang.
+- **KRS Period Validation:** Menambahkan validasi pada `postKrs` dan `deleteKrs` untuk memastikan transaksi hanya bisa dilakukan jika tanggal saat ini berada dalam rentang `Start_Date` dan `End_Date` dari `mstr_term_year`.
+- **DPA (Dosen Pembimbing Akademik):** Menambahkan field `Dpa` pada data mahasiswa yang mengambil nama dosen dari tabel `acd_student_supervision` dan `emp_employee`.
+- **Avatar Logic:** Menambahkan field `Avatar` yang mengembalikan URL foto mahasiswa. Jika path dimulai dengan `http`, digunakan langsung. Jika tidak, dianggap file lokal di `storage/`. Jika tidak ada foto, menggunakan layanan `ui-avatars.com`.
 
 ## Hasil Verifikasi
 

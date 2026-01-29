@@ -257,11 +257,11 @@ class StudentController extends Controller
                         'addr.Rt',
                         'addr.Rw',
                         'addr.Dusun',
-                        'addr.Sub_District',
-                        'dist.District_Name',
                         'addr.Zip_Code',
                         DB::raw("(SELECT SUM(max_sks) FROM (SELECT MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_student_krs GROUP BY Student_Id, Course_Id) as t WHERE t.Student_Id = s.Student_Id) as Total_Sks"),
-                        DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk")
+                        DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk"),
+                        DB::raw("(SELECT e.Full_Name FROM acd_student_supervision ss JOIN emp_employee e ON ss.Employee_Id = e.Employee_Id WHERE ss.Student_Id = s.Student_Id LIMIT 1) as Dpa"),
+                        's.Photo'
                     );
             } else {
                 $query->select(
@@ -294,8 +294,10 @@ class StudentController extends Controller
                     's.Email_Corporate',
                     's.Phone_Mobile',
                     'g.Gender_Type',
+                    's.Photo',
                     DB::raw("(SELECT SUM(max_sks) FROM (SELECT MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_student_krs GROUP BY Student_Id, Course_Id) as t WHERE t.Student_Id = s.Student_Id) as Total_Sks"),
-                    DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk")
+                    DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk"),
+                    DB::raw("(SELECT e.Full_Name FROM acd_student_supervision ss JOIN emp_employee e ON ss.Employee_Id = e.Employee_Id WHERE ss.Student_Id = s.Student_Id LIMIT 1) as Dpa")
                 );
             }
 
@@ -376,10 +378,16 @@ class StudentController extends Controller
                         $ibu  = $parents->firstWhere('Parent_Type_Id', 2);
                         $wali = $parents->firstWhere('Parent_Type_Id', 3);
 
+                        $photoPath = $s->Photo;
+                        $avatar = $photoPath
+                            ? (str_starts_with($photoPath, 'http') ? $photoPath : url('storage/' . $photoPath))
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($s->Full_Name ?? 'User') . '&background=random';
+
                         return [
                             'Student_Id' => $s->Student_Id,
                             'NIM' => $s->Nim,
                             'Nama' => $s->Full_Name,
+                            'Avatar' => $avatar,
                             'Tempat_Lahir' => $s->Birth_Place,
                             'Tanggal_Lahir' => $birth,
                             'Jenis_Kelamin' => $s->Gender_Type,
@@ -421,7 +429,12 @@ class StudentController extends Controller
                             'Ipk' => $s->Ipk ?? 0,
                         ];
                     } else {
-                        return (array) $s;
+                        $item = (array) $s;
+                        $photoPath = $s->Photo;
+                        $item['Avatar'] = $photoPath
+                            ? (str_starts_with($photoPath, 'http') ? $photoPath : url('storage/' . $photoPath))
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($s->Full_Name ?? 'User') . '&background=random';
+                        return $item;
                     }
                 });
                 return $this->successResponse('Student fetched successfully', $students, 200, $serverPaging, $students);
@@ -443,10 +456,16 @@ class StudentController extends Controller
                         $ibu  = $parents->firstWhere('Parent_Type_Id', 2);
                         $wali = $parents->firstWhere('Parent_Type_Id', 3);
 
+                        $photoPath = $s->Photo;
+                        $avatar = $photoPath
+                            ? (str_starts_with($photoPath, 'http') ? $photoPath : url('storage/' . $photoPath))
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($s->Full_Name ?? 'User') . '&background=random';
+
                         $students[] = [
                             'Student_Id' => $s->Student_Id,
                             'NIM' => $s->Nim,
                             'Nama' => $s->Full_Name,
+                            'Avatar' => $avatar,
                             'Tempat Lahir' => $s->Birth_Place,
                             'Tanggal Lahir' => $birth,
                             'Jenis Kelamin' => $s->Gender_Type,
@@ -487,7 +506,12 @@ class StudentController extends Controller
                             'Asal Program Studi' => '',
                         ];
                     } else {
-                        $students[] = (array) $s;
+                        $item = (array) $s;
+                        $photoPath = $s->Photo;
+                        $item['Avatar'] = $photoPath
+                            ? (str_starts_with($photoPath, 'http') ? $photoPath : url('storage/' . $photoPath))
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($s->Full_Name ?? 'User') . '&background=random';
+                        $students[] = $item;
                     }
                 }
 

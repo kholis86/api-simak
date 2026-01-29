@@ -310,6 +310,33 @@ class KrsController extends Controller
     //             );
     //         }
 
+    /**
+     * @OA\Post(
+     *     path="/api/post-krs",
+     *     tags={"Academic"},
+     *     summary="Submit KRS",
+     *     description="Input Kartu Rencana Studi (KRS) untuk mahasiswa.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"term_year_id","offered_course_ids"},
+     *             @OA\Property(property="term_year_id", type="integer", example=20241),
+     *             @OA\Property(property="offered_course_ids", type="array", @OA\Items(type="integer", example=150)),
+     *             @OA\Property(property="student_id", type="integer", example=1001, description="Wajib jika menggunakan api-token")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="KRS successfully submitted",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="KRS successfully submitted")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation failed or Period closed")
+     * )
+     */
     public function postKrs(Request $request)
     {
         DB::beginTransaction(); // Pastikan ini di-uncomment jika ingin transaksi aktif
@@ -321,6 +348,13 @@ class KrsController extends Controller
                 'offered_course_ids'        => 'required|array|min:1',
                 'offered_course_ids.*'      => 'required|integer',
             ]);
+
+            // 0. CEK PERIODE KRS
+            $periodError = $this->validateKrsPeriod($request->term_year_id);
+            if ($periodError) {
+                DB::rollBack();
+                return $this->errorResponse('KRS Period Closed', $periodError, 422);
+            }
 
             $tokenName  = CheckJenisToken::getName($request);
             $dataBearer = $request->user();
@@ -462,140 +496,32 @@ class KrsController extends Controller
         }
     }
 
-    public function postKrsOLD(Request $request)
-    {
-        // Mulai Database Transaction di awal fungsi
-        // Semua operasi DB (SELECT, INSERT) akan berada di dalam transaction ini
-        // DB::beginTransaction();
-
-        try {
-            $request->validate([
-                // ... (validation rules remain the same) ...
-                'term_year_id'          => 'required|integer',
-                'items'                 => 'required|array|min:1',
-                'items.*.course_id'     => 'required|integer',
-                'items.*.class_prog_id' => 'required|integer',
-                'items.*.class_id'      => 'required|integer',
-                'items.*.sks'           => 'required|numeric|min:1',
-                'items.*.amount'        => 'nullable|numeric',
-            ]);
-
-            $tokenName = CheckJenisToken::getName($request);
-            $dataBearer = $request->user();
-
-            $studentId = ($tokenName == 'mahasiswa-token')
-                ? $dataBearer->Student_Id
-                : $request->student_id;
-
-            if (!$studentId) {
-                // Rollback jika validasi awal gagal
-                // DB::rollBack();
-                return $this->errorResponse(
-                    'Student_Id required',
-                    'Student_Id missing',
-                    422
-                );
-            }
-
-            $termYearId = $request->term_year_id;
-            $items = $request->items;
-
-            $maxSKS = 24;
-            $now = now();
-            $insertData = [];
-
-            // Ambil KRS existing (operasi SELECT masih diperlukan untuk validasi)
-            $existingKrs = DB::table('acd_student_krs')
-                ->where('Student_Id', $studentId)
-                ->where('Term_Year_Id', $termYearId)
-                // (Opsional) Tambahkan lockForUpdate() di sini jika Anda menguji race condition
-                // ->lockForUpdate() 
-                ->get();
-
-            $existingCourseIds = $existingKrs->pluck('Course_Id')->toArray();
-            $existingTotalSks = $existingKrs->sum('Sks');
-
-            $totalNewSks = 0;
-
-            foreach ($items as $item) {
-                // (A) Cek duplicate course
-                if (in_array($item['course_id'], $existingCourseIds)) {
-                    // DB::rollBack(); // Rollback sebelum mengembalikan error
-                    return $this->errorResponse(
-                        'Duplicate Course',
-                        'Mata kuliah sudah diambil sebelumnya: ' . $item['course_id'],
-                        422
-                    );
-                }
-
-                // (C) Validasi Class & Class Program (operasi SELECT)
-                $validClass = DB::table('mstr_class')->where('Class_Id', $item['class_id'])->exists();
-                $validCP = DB::table('mstr_class_program')->where('Class_Prog_Id', $item['class_prog_id'])->exists();
-
-                if (!$validClass || !$validCP) {
-                    // DB::rollBack(); // Rollback sebelum mengembalikan error
-                    return $this->errorResponse(
-                        'Invalid class data',
-                        'Class / Class Program tidak valid',
-                        422
-                    );
-                }
-
-                $totalNewSks += $item['sks'];
-
-                $insertData[] = [
-                    // ... (data insert) ...
-                    'Student_Id'    => $studentId,
-                    'Term_Year_Id'  => $termYearId,
-                    'Course_Id'     => $item['course_id'],
-                    'Class_Prog_Id' => $item['class_prog_id'],
-                    'Class_Id'      => $item['class_id'],
-                    'Sks'           => $item['sks'],
-                    'Amount'        => $item['amount'] ?? 0,
-                    'Krs_Date'      => $now,
-                    'Created_By'    => $dataBearer->User_Id ?? 'system',
-                    'Created_Date'  => $now,
-                    'Modified_By'   => $dataBearer->User_Id ?? 'system',
-                    'Modified_Date' => $now,
-                ];
-            }
-
-            // (B) Cek total SKS
-            if (($existingTotalSks + $totalNewSks) > $maxSKS) {
-                // DB::rollBack(); // Rollback sebelum mengembalikan error
-                return $this->errorResponse(
-                    'SKS Over Limit',
-                    'Total SKS melebihi batas maksimum ' . $maxSKS,
-                    422
-                );
-            }
-
-            // OPERASI INSERT: Ini akan dieksekusi, TAPI TIDAK DI-COMMIT
-            DB::table('acd_student_krs')->insert($insertData);
-
-            // *** POIN KRITIS: ROLLBACK DI SINI ***
-            // DB::rollBack();
-
-            return $this->successResponse(
-                'KRS successfully validated (Rollback Mode)', // Ganti pesan untuk kejelasan
-                [
-                    'total_inserted' => count($insertData),
-                    'total_sks_now'  => $existingTotalSks + $totalNewSks,
-                    'max_sks'        => $maxSKS
-                ],
-                201
-            );
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Rollback jika ada error validasi
-            // DB::rollBack();
-            return $this->errorResponse('Validation failed', $e->errors(), 422);
-        } catch (\Exception $e) {
-            // Rollback jika ada error umum
-            // DB::rollBack();
-            return $this->errorResponse('Internal server error', $e->getMessage(), 500);
-        }
-    }
-
+    /**
+     * @OA\Delete(
+     *     path="/api/delete-krs",
+     *     tags={"Academic"},
+     *     summary="Delete KRS",
+     *     description="Hapus satu item KRS mahasiswa.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"krs_id"},
+     *             @OA\Property(property="krs_id", type="integer", example=1),
+     *             @OA\Property(property="student_id", type="integer", example=1001, description="Wajib jika menggunakan api-token")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="KRS deleted successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="KRS deleted successfully")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="KRS not found")
+     * )
+     */
     public function deleteKrs(Request $request)
     {
         try {
@@ -628,18 +554,29 @@ class KrsController extends Controller
                 );
             }
 
-            $deleted = DB::table('acd_student_krs')
+            // Cari Data KRS dulu untuk dapat Term_Year_Id
+            $krs = DB::table('acd_student_krs')
                 ->where('Krs_Id', $request->krs_id)
                 ->where('Student_Id', $studentId)
-                ->delete();
+                ->first();
 
-            if (!$deleted) {
+            if (!$krs) {
                 return $this->errorResponse(
                     'Not Found',
                     'Data KRS tidak ditemukan atau bukan milik mahasiswa terkait',
                     404
                 );
             }
+
+            // CEK PERIODE KRS
+            $periodError = $this->validateKrsPeriod($krs->Term_Year_Id);
+            if ($periodError) {
+                return $this->errorResponse('KRS Period Closed', $periodError, 422);
+            }
+
+            $deleted = DB::table('acd_student_krs')
+                ->where('Krs_Id', $request->krs_id)
+                ->delete();
 
             return $this->successResponse(
                 'KRS deleted successfully',
@@ -651,5 +588,25 @@ class KrsController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse('Internal server error', $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * Helper untuk validasi periode KRS
+     * Mengembalikan pesan error (string) jika tidak valid, atau null jika valid.
+     */
+    private function validateKrsPeriod($termYearId)
+    {
+        $term = DB::table('mstr_term_year')->where('Term_Year_Id', $termYearId)->first();
+
+        if (!$term) {
+            return 'Term Year ID tidak ditemukan.';
+        }
+
+        $now = date('Y-m-d');
+        if ($now < $term->Start_Date || $now > $term->End_Date) {
+            return 'Periode pengisian/perubahan KRS untuk semester ini sudah ditutup. (' . $term->Start_Date . ' s/d ' . $term->End_Date . ')';
+        }
+
+        return null;
     }
 }

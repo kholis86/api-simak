@@ -11,6 +11,34 @@ class AuthController extends Controller
 {
     use ApiResponseTrait;
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/login",
+     *     tags={"Auth"},
+     *     summary="Login Mahasiswa",
+     *     description="Endpoint login untuk mahasiswa menggunakan NIM dan Password MD5.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"username","password"},
+     *             @OA\Property(property="username", type="string", example="12345678"),
+     *             @OA\Property(property="password", type="string", example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="Login successful"),
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthorized"),
+     *     @OA\Response(response=422, description="Validation failed")
+     * )
+     */
     public function login(Request $request)
     {
         try {

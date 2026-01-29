@@ -106,6 +106,22 @@ class ApiAuthController extends Controller
     }
 
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     tags={"API Auth"},
+     *     summary="Logout API",
+     *     description="Hapus token akses API yang sedang aktif.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logged out successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Logged out successfully")
+     *         )
+     *     )
+     * )
+     */
     public function logout(Request $request)
     {
         // Hapus token yang sedang dipakai
@@ -114,6 +130,20 @@ class ApiAuthController extends Controller
         return response()->json(['message' => 'Logged out successfully']);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/profile",
+     *     tags={"API Auth"},
+     *     summary="Get Token Profile",
+     *     description="Ambil data profil berdasarkan token.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(type="object")
+     *     )
+     * )
+     */
     public function profile(Request $request)
     {
         $user = $request->user();

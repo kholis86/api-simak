@@ -245,6 +245,26 @@ class MasterController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/master/term-year",
+     *     tags={"Master"},
+     *     summary="Get all term years",
+     *     description="Ambil daftar tahun ajaran, filter otomatis jika user mahasiswa.",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(type="object")
+     *     )
+     * )
+     */
     public function termYear(Request $request)
     {
         try {

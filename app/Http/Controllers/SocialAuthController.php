@@ -10,12 +10,30 @@ use Laravel\Socialite\Facades\Socialite;
 class SocialAuthController extends Controller
 {
 
+    /**
+     * @OA\Get(
+     *     path="/api/auth/google/redirect",
+     *     tags={"Auth"},
+     *     summary="Redirect to Google",
+     *     description="Redirect user ke halaman login Google.",
+     *     @OA\Response(response=302, description="Redirect to Google")
+     * )
+     */
     public function redirectToProvider()
     {
         // Menggunakan stateless() sangat penting untuk otentikasi API/SPA
         return Socialite::driver('google')->stateless()->redirect();
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/auth/google/callback",
+     *     tags={"Auth"},
+     *     summary="Google Callback",
+     *     description="Hapus callback dari Google setelah login sukses.",
+     *     @OA\Response(response=302, description="Redirect to Frontend with token")
+     * )
+     */
     public function handleProviderCallback()
     {
         try {
