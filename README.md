@@ -1,61 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIMAK API - Sistem Informasi Akademik
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="300" alt="Laravel Logo">
 </p>
 
-## About Laravel
+[![Laravel Version](https://img.shields.io/badge/Laravel-v12.0-red?style=flat-square&logo=laravel)](https://laravel.com)
+[![PHP Version](https://img.shields.io/badge/PHP-8.2+-777bb4?style=flat-square&logo=php)](https://www.php.net)
+[![RoadRunner](https://img.shields.io/badge/RoadRunner-Fast-blue?style=flat-square)](https://roadrunner.dev)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+API Backend untuk Sistem Informasi Akademik (SIMAK) yang dibangun menggunakan Laravel 12 dengan performa tinggi menggunakan Laravel Octane dan RoadRunner.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 🚀 Fitur Utama
 
-## Learning Laravel
+- **High Performance**: Menggunakan Laravel Octane dengan RoadRunner.
+- **RESTful API**: Dokumentasi lengkap menggunakan Swagger/L5-Swagger.
+- **Authentication**: Mendukung Sanctum API Token dan Socialite (Google Login).
+- **Academic Modules**: Pengelolaan KRS, KHS, AKM, Data Mahasiswa, dan Mata Kuliah.
+- **Auto-Reload**: Pengembangan lebih cepat dengan watcher otomatis.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## 🛠 Prerequisites
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Pastikan perangkat Anda sudah terinstall:
 
-## Laravel Sponsors
+- **PHP 8.2** atau lebih tinggi
+- **Composer** (Dependency Manager untuk PHP)
+- **Node.js & NPM** (Untuk development tools)
+- **SQLite/MySQL** (Default menggunakan SQLite)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## ⚙️ Instalasi Cepat
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Ikuti langkah-langkah berikut untuk menjalankan project di lingkungan baru:
 
-## Contributing
+1. **Clone & Install Dependencies**
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+    ```bash
+    composer install
+    npm install
+    ```
 
-## Code of Conduct
+2. **Setup Environtment**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
-## Security Vulnerabilities
+3. **Database & Seeding**
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+    ```bash
+    # Buat file database jika menggunakan SQLite
+    touch database/database.sqlite
 
-## License
+    # Jalankan migrasi dan seeder
+    php artisan migrate:fresh --seed
+    ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🏃 Menjalankan Aplikasi
+
+Project ini dioptimalkan menggunakan **RoadRunner**. Anda bisa menjalankannya dengan beberapa cara:
+
+### 1. Mode Development (dengan Auto-Reload)
+
+Gunakan perintah ini agar server otomatis restart saat ada perubahan file:
+
+```bash
+./rr.exe serve -c .rr.dev.yaml
+```
+
+### 2. Mode Produksi
+
+```bash
+./rr.exe serve -c .rr.prod.yaml
+```
+
+### 3. Laravel Standard (Jika tidak ingin menggunakan RoadRunner)
+
+```bash
+php artisan serve
+```
+
+---
+
+## 📖 Dokumentasi API
+
+Aplikasi ini sudah dilengkapi dengan **Swagger UI**. Setelah server berjalan, Anda dapat mengakses dokumentasi API di:
+
+🔗 **[http://localhost:8080/api/documentation](http://localhost:8080/api/documentation)**
+
+---
+
+## 🛠 Perintah Penting (Development)
+
+| Perintah                          | Deskripsi                          |
+| :-------------------------------- | :--------------------------------- |
+| `php artisan octane:install`      | Install/Setup Octane               |
+| `php artisan l5-swagger:generate` | Generate ulang dokumentasi Swagger |
+| `php artisan test`                | Menjalankan unit & feature testing |
+| `php artisan route:list`          | Melihat semua daftar endpoint      |
+
+---
+
+## 📁 Struktur Penting
+
+- `app/Http/Controllers`: Logika bisnis API.
+- `routes/api.php`: Definisi endpoint API.
+- `.rr.yaml`: Konfigurasi server RoadRunner.
+- `docs/`: File dokumentasi tambahan dan walkthrough.
+
+---
+
+## 📄 Lisensi
+
+Project ini dilisensikan di bawah [MIT license](https://opensource.org/licenses/MIT).
