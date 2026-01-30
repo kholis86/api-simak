@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost",
+            "url": "http://localhost:8080",
             "description": "Local server"
         }
     ],
@@ -1536,6 +1536,210 @@
                         "description": "Redirect to Frontend with token"
                     }
                 }
+            }
+        },
+        "/api/student-activity": {
+            "get": {
+                "tags": [
+                    "Academic"
+                ],
+                "summary": "Ambil data aktivitas mahasiswa",
+                "description": "Endpoint ini digunakan untuk mengambil data aktivitas mahasiswa. Data akan difilter berdasarkan Student_Id jika menggunakan token mahasiswa.",
+                "operationId": "3e2d84b509413171674c90c01d0b6ac2",
+                "parameters": [
+                    {
+                        "name": "Department_Id",
+                        "in": "query",
+                        "description": "ID Departemen (Prodi)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "Term_Year_Id",
+                        "in": "query",
+                        "description": "ID Semester (Tahun Ajaran)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20231
+                        }
+                    },
+                    {
+                        "name": "Student_Id",
+                        "in": "query",
+                        "description": "ID Mahasiswa (Filter spesifik)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 123
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data aktivitas mahasiswa berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "fetched"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "program_mbkm": {
+                                                        "type": "string",
+                                                        "example": "Magang"
+                                                    },
+                                                    "jenis_anggota": {
+                                                        "type": "string",
+                                                        "example": "Personal"
+                                                    },
+                                                    "nama_jenis_aktivitas_mahasiswa": {
+                                                        "type": "string",
+                                                        "example": "Aktivitas Mahasiswa"
+                                                    },
+                                                    "prodi": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "id_semester": {
+                                                        "type": "integer",
+                                                        "example": 20231
+                                                    },
+                                                    "judul": {
+                                                        "type": "string",
+                                                        "example": "Judul Aktivitas"
+                                                    },
+                                                    "keterangan": {
+                                                        "type": "string",
+                                                        "example": "Keterangan Aktivitas"
+                                                    },
+                                                    "lokasi": {
+                                                        "type": "string",
+                                                        "example": "Lokasi Aktivitas"
+                                                    },
+                                                    "sk_tugas": {
+                                                        "type": "string",
+                                                        "example": "SK/123/2023"
+                                                    },
+                                                    "tanggal_sk_tugas": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-01-01"
+                                                    },
+                                                    "tanggal_mulai": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-01-01"
+                                                    },
+                                                    "tanggal_selesai": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2023-06-01"
+                                                    },
+                                                    "list_peserta": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "nama": {
+                                                                    "type": "string",
+                                                                    "example": "Ahmad"
+                                                                },
+                                                                "nim": {
+                                                                    "type": "string",
+                                                                    "example": "24001123"
+                                                                },
+                                                                "jenis_peran": {
+                                                                    "type": "string",
+                                                                    "example": "Ketua"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "list_dosen_pembimbing": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "properties": {
+                                                                "nama_dosen": {
+                                                                    "type": "string",
+                                                                    "example": "Dr. Budi"
+                                                                },
+                                                                "pembimbing_ke": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "nama_kategori_kegiatan": {
+                                                                    "type": "string",
+                                                                    "example": "Pembimbing Utama"
+                                                                },
+                                                                "nidn": {
+                                                                    "type": "string",
+                                                                    "example": "0123456789"
+                                                                },
+                                                                "nuptk": {
+                                                                    "type": "string",
+                                                                    "example": "9876543210"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Terjadi kesalahan server internal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 500
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "failed to fetch"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/students": {

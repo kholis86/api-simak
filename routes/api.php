@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KrsController;
 use App\Http\Controllers\OfferedCourseController;
 use App\Http\Controllers\SocialAuthController;
+use App\Http\Controllers\StudentActivityController;
 
 Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToProvider']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleProviderCallback']);
@@ -41,6 +42,9 @@ Route::middleware(['api_token', 'gzip'])->group(function () {
     //AKM
     Route::get('/akm', [akmController::class, 'akmData']);
     Route::get('/akmBySemester', [akmController::class, 'akmBySemesterData']);
+
+    //Student Activity
+    Route::get('/student-activity', [StudentActivityController::class, 'studentActivityData']);
 
     //master
     Route::prefix('master')->group(function () {
