@@ -13,7 +13,7 @@ class StudentActivity extends Model
     protected $fillable = [
         'Program_MBKM',
         'Jenis_Anggota',
-        'Jenis_Aktivitas',
+        'Student_Activity_Type_Id',
         'Department_Id',
         'Term_Year_Id',
         'Judul',
@@ -28,6 +28,15 @@ class StudentActivity extends Model
     ];
 
     /* ================= RELATIONS ================= */
+
+    public function activityType()
+    {
+        return $this->belongsTo(
+            StudentActivityType::class,
+            'Student_Activity_Type_Id',
+            'Student_Activity_Type_Id'
+        );
+    }
 
     public function department()
     {

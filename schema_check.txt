@@ -1,0 +1,2 @@
+acd_student_address: Student_Address_Id, Address_Category_Id, Student_Id, City_Id, Country_Id, District_Id, Province_Id, Sub_District, Address, Zip_Code, Rw, Rt, Phone_Home, Description, Created_By, Created_Date, Modified_By, Modified_Date, Order_Id, Dusun
+mstr_district: District_Id, City_Id, District_Code, District_Name, Order_Id, Created_By, Created_Date, Modified_By, Modified_Date

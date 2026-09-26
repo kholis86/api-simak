@@ -30,7 +30,7 @@ class StudentActivityMember extends Model
     public function student()
     {
         return $this->belongsTo(
-            Student::class,
+            AcdStudent::class,
             'Student_Id',
             'Student_Id'
         );

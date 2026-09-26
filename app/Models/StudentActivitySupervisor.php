@@ -14,10 +14,26 @@ class StudentActivitySupervisor extends Model
         'Student_Activity_Id',
         'Employee_Id',
         'Pembimbing_Ke',
-        'Kategori_Kegiatan',
+        'Activity_Supervisor_Category_Id',
     ];
 
-    /* ================= RELATIONS ================= */
+    public function employee()
+    {
+        return $this->belongsTo(
+            EmpEmployee::class,
+            'Employee_Id',
+            'Employee_Id'
+        );
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(
+            StudentActivitySupervisorCategory::class,
+            'Activity_Supervisor_Category_Id',
+            'Activity_Supervisor_Category_Id'
+        );
+    }
 
     public function activity()
     {
@@ -25,15 +41,6 @@ class StudentActivitySupervisor extends Model
             StudentActivity::class,
             'Student_Activity_Id',
             'Student_Activity_Id'
-        );
-    }
-
-    public function employee()
-    {
-        return $this->belongsTo(
-            emp_employee::class,
-            'Employee_Id',
-            'Employee_Id'
         );
     }
 }

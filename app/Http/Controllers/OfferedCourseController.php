@@ -150,7 +150,17 @@ class OfferedCourseController extends Controller
                     DATE(ty.End_Date) as End_Date,
                     c.Course_Code,
                     c.Course_Name,
-                    (IFNULL(c.Sks_Tm, 0) + IFNULL(c.Sks_Prak, 0) + IFNULL(c.Sks_Prak_Lap, 0) + IFNULL(c.Sks_Sim, 0)) as Sks,
+                    IFNULL(c.Sks_Tm, 0) AS Sks_Tm,
+                    IFNULL(c.Sks_Prak, 0) AS Sks_Prak,
+                    IFNULL(c.Sks_Prak_Lap, 0) AS Sks_Prak_Lap,
+                    IFNULL(c.Sks_Sim, 0) AS Sks_Sim,
+
+                    (
+                        IFNULL(c.Sks_Tm, 0)
+                        + IFNULL(c.Sks_Prak, 0)
+                        + IFNULL(c.Sks_Prak_Lap, 0)
+                        + IFNULL(c.Sks_Sim, 0)
+                    ) AS Sks,
                     cl.Class_Name,
                     (oc.Class_Capacity - (
                         SELECT count(student_id)

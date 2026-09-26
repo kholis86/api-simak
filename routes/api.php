@@ -11,6 +11,9 @@ use App\Http\Controllers\KrsController;
 use App\Http\Controllers\OfferedCourseController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\StudentActivityController;
+use App\Http\Controllers\CamaruController;
+use App\Http\Controllers\PaymentController;
+
 
 Route::get('auth/google/redirect', [SocialAuthController::class, 'redirectToProvider']);
 Route::get('auth/google/callback', [SocialAuthController::class, 'handleProviderCallback']);
@@ -45,6 +48,21 @@ Route::middleware(['api_token', 'gzip'])->group(function () {
 
     //Student Activity
     Route::get('/student-activity', [StudentActivityController::class, 'studentActivityData']);
+
+    //Camaru
+    Route::get('/camaru', [CamaruController::class, 'index']);
+    Route::get('/camaru/{id}', [CamaruController::class, 'show']);
+
+    //Payment
+    Route::get('/student-payment', [PaymentController::class, 'getStudentBill']);
+    Route::get('/payment-channels', [PaymentController::class, 'getPaymentChannels']);
+    Route::get('/payment-history', [PaymentController::class, 'getPaymentHistory']);
+    Route::get('/payment-history/detail', [PaymentController::class, 'getPaymentDetail']);
+    Route::get('/active-payment', [PaymentController::class, 'getActivePayment']);
+
+
+
+
 
     //master
     Route::prefix('master')->group(function () {

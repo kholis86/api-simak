@@ -257,7 +257,10 @@ class StudentController extends Controller
                         'addr.Rt',
                         'addr.Rw',
                         'addr.Dusun',
+                        'addr.Sub_District',
+                        'dist.District_Name',
                         'addr.Zip_Code',
+
                         DB::raw("(SELECT SUM(max_sks) FROM (SELECT MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_student_krs GROUP BY Student_Id, Course_Id) as t WHERE t.Student_Id = s.Student_Id) as Total_Sks"),
                         DB::raw("(SELECT ROUND(SUM(max_bnk) / NULLIF(SUM(max_sks), 0), 2) FROM (SELECT MAX(Bnk_Value) as max_bnk, MAX(Sks) as max_sks, Student_Id, Course_Id FROM acd_transcript GROUP BY Student_Id, Course_Id) as tr WHERE tr.Student_Id = s.Student_Id) as Ipk"),
                         DB::raw("(SELECT e.Full_Name FROM acd_student_supervision ss JOIN emp_employee e ON ss.Employee_Id = e.Employee_Id WHERE ss.Student_Id = s.Student_Id LIMIT 1) as Dpa"),
@@ -307,6 +310,7 @@ class StudentController extends Controller
             if ($request->filled('register_number')) $query->where('s.Register_Number', $request->register_number);
             if ($request->filled('department_id')) $query->where('s.Department_Id', $request->department_id);
             if ($request->filled('entry_year')) $query->where('s.Entry_Year_Id', $request->entry_year);
+            if ($request->filled('entry_term')) $query->where('s.Entry_Term_Id', $request->entry_term);
             if ($request->filled('kip')) {
                 $isKip = filter_var($request->kip, FILTER_VALIDATE_BOOLEAN);
                 if ($isKip) {
@@ -399,6 +403,7 @@ class StudentController extends Controller
                             'Kewarganegaraan' => $s->Citizenship_Name,
                             'Jenis_Pendaftaran' => $s->Register_Status_Name,
                             'Tgl_Masuk_Kuliah' => $masukKuliah,
+                            'Term_Year_Id' => $termId,
                             'Alamat' => $s->Address,
                             'Kelurahan' => $s->Sub_District,
                             'Kecamatan' => $s->District_Name,
@@ -477,6 +482,7 @@ class StudentController extends Controller
                             'Kewarganegaraan' => $s->Citizenship_Name,
                             'Jenis Pendaftaran' => $s->Register_Status_Name,
                             'Tgl Masuk Kuliah' => $masukKuliah,
+                            'Term_Year_Id' => $termId,
                             'Alamat' => $s->Address,
                             'Kelurahan' => $s->Sub_District,
                             'Kecamatan' => $s->District_Name,
